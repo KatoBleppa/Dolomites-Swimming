@@ -1,0 +1,3833 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "",
+    "title": "standard public schema",
+    "version": "14.1"
+  },
+  "host": "vupcplusmldrifueqpyp.supabase.co:443",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json",
+    "application/vnd.pgrst.object+json;nulls=stripped",
+    "application/vnd.pgrst.object+json",
+    "text/csv"
+  ],
+  "produces": [
+    "application/json",
+    "application/vnd.pgrst.object+json;nulls=stripped",
+    "application/vnd.pgrst.object+json",
+    "text/csv"
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "produces": [
+          "application/openapi+json",
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "summary": "OpenAPI description (this document)",
+        "tags": [
+          "Introspection"
+        ]
+      }
+    },
+    "/splits": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.splits.splits_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.splits_res_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.distance"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.split_time"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.updated_at"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/range"
+          },
+          {
+            "$ref": "#/parameters/rangeUnit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/preferCount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/splits"
+              },
+              "type": "array"
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        },
+        "summary": "Intermediate split times for race results",
+        "tags": [
+          "splits"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/body.splits"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/preferPost"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "summary": "Intermediate split times for race results",
+        "tags": [
+          "splits"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.splits.splits_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.splits_res_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.distance"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.split_time"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.updated_at"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Intermediate split times for race results",
+        "tags": [
+          "splits"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.splits.splits_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.splits_res_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.distance"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.split_time"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.splits.updated_at"
+          },
+          {
+            "$ref": "#/parameters/body.splits"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Intermediate split times for race results",
+        "tags": [
+          "splits"
+        ]
+      }
+    },
+    "/_limits": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_course"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_gender"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_cat"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_race_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_time_str"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_time_sec"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_time_dec"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_season"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.note"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.updated_at"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/range"
+          },
+          {
+            "$ref": "#/parameters/rangeUnit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/preferCount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/_limits"
+              },
+              "type": "array"
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        },
+        "summary": "Qualifying time limits for races by category",
+        "tags": [
+          "_limits"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/body._limits"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/preferPost"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "summary": "Qualifying time limits for races by category",
+        "tags": [
+          "_limits"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_course"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_gender"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_cat"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_race_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_time_str"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_time_sec"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_time_dec"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_season"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.note"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.updated_at"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Qualifying time limits for races by category",
+        "tags": [
+          "_limits"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_course"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_gender"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_cat"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_race_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_time_str"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_time_sec"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_time_dec"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.lim_season"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.note"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._limits.updated_at"
+          },
+          {
+            "$ref": "#/parameters/body._limits"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Qualifying time limits for races by category",
+        "tags": [
+          "_limits"
+        ]
+      }
+    },
+    "/_races": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._races.race_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.race_id_fin"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.distance"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.relay_count"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_long_en"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_short_en"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_long_it"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_short_it"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_long_de"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_short_de"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.updated_at"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/range"
+          },
+          {
+            "$ref": "#/parameters/rangeUnit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/preferCount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/_races"
+              },
+              "type": "array"
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        },
+        "summary": "Race definitions with multilingual stroke names",
+        "tags": [
+          "_races"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/body._races"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/preferPost"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "summary": "Race definitions with multilingual stroke names",
+        "tags": [
+          "_races"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._races.race_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.race_id_fin"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.distance"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.relay_count"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_long_en"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_short_en"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_long_it"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_short_it"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_long_de"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_short_de"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.updated_at"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Race definitions with multilingual stroke names",
+        "tags": [
+          "_races"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._races.race_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.race_id_fin"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.distance"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.relay_count"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_long_en"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_short_en"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_long_it"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_short_it"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_long_de"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.stroke_short_de"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._races.updated_at"
+          },
+          {
+            "$ref": "#/parameters/body._races"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Race definitions with multilingual stroke names",
+        "tags": [
+          "_races"
+        ]
+      }
+    },
+    "/athletes": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.athletes.fincode"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.firstname"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.lastname"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.birthdate"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.gender"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.email"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.phone"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.updated_at"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/range"
+          },
+          {
+            "$ref": "#/parameters/rangeUnit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/preferCount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/athletes"
+              },
+              "type": "array"
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        },
+        "summary": "Core athlete/swimmer information",
+        "tags": [
+          "athletes"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/body.athletes"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/preferPost"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "summary": "Core athlete/swimmer information",
+        "tags": [
+          "athletes"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.athletes.fincode"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.firstname"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.lastname"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.birthdate"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.gender"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.email"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.phone"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.updated_at"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Core athlete/swimmer information",
+        "tags": [
+          "athletes"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.athletes.fincode"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.firstname"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.lastname"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.birthdate"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.gender"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.email"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.phone"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.athletes.updated_at"
+          },
+          {
+            "$ref": "#/parameters/body.athletes"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Core athlete/swimmer information",
+        "tags": [
+          "athletes"
+        ]
+      }
+    },
+    "/results": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.results.res_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.fincode"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.meet_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.event_numb"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.res_time_decimal"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.updated_at"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/range"
+          },
+          {
+            "$ref": "#/parameters/rangeUnit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/preferCount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/results"
+              },
+              "type": "array"
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        },
+        "summary": "Competition results for athletes",
+        "tags": [
+          "results"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/body.results"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/preferPost"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "summary": "Competition results for athletes",
+        "tags": [
+          "results"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.results.res_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.fincode"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.meet_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.event_numb"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.res_time_decimal"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.updated_at"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Competition results for athletes",
+        "tags": [
+          "results"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.results.res_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.fincode"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.meet_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.event_numb"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.res_time_decimal"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.results.updated_at"
+          },
+          {
+            "$ref": "#/parameters/body.results"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Competition results for athletes",
+        "tags": [
+          "results"
+        ]
+      }
+    },
+    "/_seasons": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._seasons.season_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.season_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.season_start"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.season_end"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.updated_at"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/range"
+          },
+          {
+            "$ref": "#/parameters/rangeUnit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/preferCount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/_seasons"
+              },
+              "type": "array"
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        },
+        "summary": "Swimming seasons definition",
+        "tags": [
+          "_seasons"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/body._seasons"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/preferPost"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "summary": "Swimming seasons definition",
+        "tags": [
+          "_seasons"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._seasons.season_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.season_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.season_start"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.season_end"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.updated_at"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Swimming seasons definition",
+        "tags": [
+          "_seasons"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._seasons.season_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.season_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.season_start"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.season_end"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._seasons.updated_at"
+          },
+          {
+            "$ref": "#/parameters/body._seasons"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Swimming seasons definition",
+        "tags": [
+          "_seasons"
+        ]
+      }
+    },
+    "/events": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.events.ms_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.meet_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.event_numb"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.ms_race_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.gender"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.ms_cat"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.created_at"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/range"
+          },
+          {
+            "$ref": "#/parameters/rangeUnit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/preferCount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/events"
+              },
+              "type": "array"
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        },
+        "summary": "Table of the events for every meet",
+        "tags": [
+          "events"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/body.events"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/preferPost"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "summary": "Table of the events for every meet",
+        "tags": [
+          "events"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.events.ms_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.meet_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.event_numb"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.ms_race_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.gender"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.ms_cat"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.created_at"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Table of the events for every meet",
+        "tags": [
+          "events"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.events.ms_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.meet_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.event_numb"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.ms_race_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.gender"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.ms_cat"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.events.created_at"
+          },
+          {
+            "$ref": "#/parameters/body.events"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Table of the events for every meet",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/_categories": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._categories.cat_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.cat_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.age"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.gender"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.group"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.updated_at"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/range"
+          },
+          {
+            "$ref": "#/parameters/rangeUnit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/preferCount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/_categories"
+              },
+              "type": "array"
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        },
+        "summary": "Swimming categories based on age and gender",
+        "tags": [
+          "_categories"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/body._categories"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/preferPost"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "summary": "Swimming categories based on age and gender",
+        "tags": [
+          "_categories"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._categories.cat_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.cat_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.age"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.gender"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.group"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.updated_at"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Swimming categories based on age and gender",
+        "tags": [
+          "_categories"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._categories.cat_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.cat_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.age"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.gender"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.group"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._categories.updated_at"
+          },
+          {
+            "$ref": "#/parameters/body._categories"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Swimming categories based on age and gender",
+        "tags": [
+          "_categories"
+        ]
+      }
+    },
+    "/roster": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.roster.roster_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.fincode"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.season_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.group"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.updated_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.rost_cat_id"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/range"
+          },
+          {
+            "$ref": "#/parameters/rangeUnit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/preferCount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/roster"
+              },
+              "type": "array"
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        },
+        "summary": "Season-dependent athlete group and category assignments",
+        "tags": [
+          "roster"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/body.roster"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/preferPost"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "summary": "Season-dependent athlete group and category assignments",
+        "tags": [
+          "roster"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.roster.roster_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.fincode"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.season_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.group"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.updated_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.rost_cat_id"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Season-dependent athlete group and category assignments",
+        "tags": [
+          "roster"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.roster.roster_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.fincode"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.season_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.group"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.updated_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.roster.rost_cat_id"
+          },
+          {
+            "$ref": "#/parameters/body.roster"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Season-dependent athlete group and category assignments",
+        "tags": [
+          "roster"
+        ]
+      }
+    },
+    "/attendance": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.attendance.att_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.sess_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.fincode"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.status_code"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.updated_at"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/range"
+          },
+          {
+            "$ref": "#/parameters/rangeUnit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/preferCount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/attendance"
+              },
+              "type": "array"
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        },
+        "summary": "Athlete attendance tracking for training sessions",
+        "tags": [
+          "attendance"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/body.attendance"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/preferPost"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "summary": "Athlete attendance tracking for training sessions",
+        "tags": [
+          "attendance"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.attendance.att_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.sess_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.fincode"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.status_code"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.updated_at"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Athlete attendance tracking for training sessions",
+        "tags": [
+          "attendance"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.attendance.att_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.sess_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.fincode"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.status_code"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.attendance.updated_at"
+          },
+          {
+            "$ref": "#/parameters/body.attendance"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Athlete attendance tracking for training sessions",
+        "tags": [
+          "attendance"
+        ]
+      }
+    },
+    "/sessions": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.sessions.sess_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.date"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.time"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.type"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.sector"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.description"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.volume"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.location"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.pool_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.sess_course"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.updated_at"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/range"
+          },
+          {
+            "$ref": "#/parameters/rangeUnit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/preferCount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/sessions"
+              },
+              "type": "array"
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        },
+        "summary": "Training sessions",
+        "tags": [
+          "sessions"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/body.sessions"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/preferPost"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "summary": "Training sessions",
+        "tags": [
+          "sessions"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.sessions.sess_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.date"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.time"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.type"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.sector"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.description"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.volume"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.location"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.pool_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.sess_course"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.updated_at"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Training sessions",
+        "tags": [
+          "sessions"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.sessions.sess_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.date"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.time"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.type"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.sector"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.description"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.volume"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.location"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.pool_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.sess_course"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.sessions.updated_at"
+          },
+          {
+            "$ref": "#/parameters/body.sessions"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Training sessions",
+        "tags": [
+          "sessions"
+        ]
+      }
+    },
+    "/_status": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._status.status_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._status.description"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/range"
+          },
+          {
+            "$ref": "#/parameters/rangeUnit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/preferCount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/_status"
+              },
+              "type": "array"
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        },
+        "tags": [
+          "_status"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/body._status"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/preferPost"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "tags": [
+          "_status"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._status.status_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._status.description"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "tags": [
+          "_status"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter._status.status_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter._status.description"
+          },
+          {
+            "$ref": "#/parameters/body._status"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "tags": [
+          "_status"
+        ]
+      }
+    },
+    "/meets": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.meets.meet_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.meet_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.pool_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.place"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.nation"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.min_date"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.max_date"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.meet_course"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.meet_groups"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.updated_at"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/order"
+          },
+          {
+            "$ref": "#/parameters/range"
+          },
+          {
+            "$ref": "#/parameters/rangeUnit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/preferCount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/meets"
+              },
+              "type": "array"
+            }
+          },
+          "206": {
+            "description": "Partial Content"
+          }
+        },
+        "summary": "Swimming competitions/meets",
+        "tags": [
+          "meets"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/body.meets"
+          },
+          {
+            "$ref": "#/parameters/select"
+          },
+          {
+            "$ref": "#/parameters/preferPost"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        },
+        "summary": "Swimming competitions/meets",
+        "tags": [
+          "meets"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.meets.meet_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.meet_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.pool_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.place"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.nation"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.min_date"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.max_date"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.meet_course"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.meet_groups"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.updated_at"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Swimming competitions/meets",
+        "tags": [
+          "meets"
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "$ref": "#/parameters/rowFilter.meets.meet_id"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.meet_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.pool_name"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.place"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.nation"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.min_date"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.max_date"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.meet_course"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.meet_groups"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.created_at"
+          },
+          {
+            "$ref": "#/parameters/rowFilter.meets.updated_at"
+          },
+          {
+            "$ref": "#/parameters/body.meets"
+          },
+          {
+            "$ref": "#/parameters/preferReturn"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "summary": "Swimming competitions/meets",
+        "tags": [
+          "meets"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "splits": {
+      "description": "Intermediate split times for race results",
+      "required": [
+        "splits_id",
+        "splits_res_id",
+        "distance"
+      ],
+      "properties": {
+        "splits_id": {
+          "description": "Note:\nThis is a Primary Key.<pk/>",
+          "format": "bigint",
+          "type": "integer"
+        },
+        "splits_res_id": {
+          "description": "Note:\nThis is a Foreign Key to `results.res_id`.<fk table='results' column='res_id'/>",
+          "format": "bigint",
+          "type": "integer"
+        },
+        "distance": {
+          "description": "Distance at which split was taken (0000-9999 meters)",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "split_time": {
+          "description": "Time in hundredths of a second (000000-999999)",
+          "format": "integer",
+          "type": "integer"
+        },
+        "created_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        },
+        "updated_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "_limits": {
+      "description": "Qualifying time limits for races by category",
+      "required": [
+        "lim_id",
+        "lim_course",
+        "lim_gender"
+      ],
+      "properties": {
+        "lim_id": {
+          "description": "Limit ID (000-999)\n\nNote:\nThis is a Primary Key.<pk/>",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "lim_course": {
+          "description": "1 for 50m pool, 2 for 25m pool",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "lim_gender": {
+          "description": "M for Male, W for Women",
+          "format": "character",
+          "maxLength": 1,
+          "type": "string"
+        },
+        "lim_cat": {
+          "description": "Note:\nThis is a Foreign Key to `_categories.cat_id`.<fk table='_categories' column='cat_id'/>",
+          "format": "integer",
+          "type": "integer"
+        },
+        "lim_race_id": {
+          "description": "Note:\nThis is a Foreign Key to `_races.race_id`.<fk table='_races' column='race_id'/>",
+          "format": "integer",
+          "type": "integer"
+        },
+        "lim_time_str": {
+          "format": "character varying",
+          "maxLength": 20,
+          "type": "string"
+        },
+        "lim_time_sec": {
+          "format": "character varying",
+          "maxLength": 10,
+          "type": "string"
+        },
+        "lim_time_dec": {
+          "format": "character varying",
+          "maxLength": 10,
+          "type": "string"
+        },
+        "lim_season": {
+          "format": "character varying",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "note": {
+          "format": "text",
+          "type": "string"
+        },
+        "created_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        },
+        "updated_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "_races": {
+      "description": "Race definitions with multilingual stroke names",
+      "required": [
+        "race_id",
+        "distance"
+      ],
+      "properties": {
+        "race_id": {
+          "description": "Race ID (000-999)\n\nNote:\nThis is a Primary Key.<pk/>",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "race_id_fin": {
+          "description": "FIN federation race ID (00-99)",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "distance": {
+          "format": "smallint",
+          "type": "integer"
+        },
+        "relay_count": {
+          "description": "Number of swimmers in relay (0 for individual)",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "stroke_long_en": {
+          "format": "character varying",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "stroke_short_en": {
+          "format": "character varying",
+          "maxLength": 10,
+          "type": "string"
+        },
+        "stroke_long_it": {
+          "format": "character varying",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "stroke_short_it": {
+          "format": "character varying",
+          "maxLength": 10,
+          "type": "string"
+        },
+        "stroke_long_de": {
+          "format": "character varying",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "stroke_short_de": {
+          "format": "character varying",
+          "maxLength": 10,
+          "type": "string"
+        },
+        "created_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        },
+        "updated_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "athletes": {
+      "description": "Core athlete/swimmer information",
+      "required": [
+        "fincode",
+        "firstname",
+        "lastname",
+        "birthdate",
+        "gender"
+      ],
+      "properties": {
+        "fincode": {
+          "description": "FIN federation code (6 digits)\n\nNote:\nThis is a Primary Key.<pk/>",
+          "format": "integer",
+          "type": "integer"
+        },
+        "firstname": {
+          "format": "character varying",
+          "maxLength": 100,
+          "type": "string"
+        },
+        "lastname": {
+          "format": "character varying",
+          "maxLength": 100,
+          "type": "string"
+        },
+        "birthdate": {
+          "format": "date",
+          "type": "string"
+        },
+        "gender": {
+          "description": "M for Male, W for Women",
+          "format": "character",
+          "maxLength": 1,
+          "type": "string"
+        },
+        "email": {
+          "format": "character varying",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "phone": {
+          "format": "character varying",
+          "maxLength": 20,
+          "type": "string"
+        },
+        "created_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        },
+        "updated_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "results": {
+      "description": "Competition results for athletes",
+      "required": [
+        "res_id",
+        "fincode",
+        "meet_id",
+        "event_numb"
+      ],
+      "properties": {
+        "res_id": {
+          "description": "Result ID (6 digits)\n\nNote:\nThis is a Primary Key.<pk/>",
+          "format": "bigint",
+          "type": "integer"
+        },
+        "fincode": {
+          "description": "Note:\nThis is a Foreign Key to `athletes.fincode`.<fk table='athletes' column='fincode'/>",
+          "format": "integer",
+          "type": "integer"
+        },
+        "meet_id": {
+          "description": "Note:\nThis is a Foreign Key to `meets.meet_id`.<fk table='meets' column='meet_id'/>",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "event_numb": {
+          "format": "smallint",
+          "type": "integer"
+        },
+        "res_time_decimal": {
+          "description": "Time in hundredths of a second (000000-999999)",
+          "format": "integer",
+          "type": "integer"
+        },
+        "created_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        },
+        "updated_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "_seasons": {
+      "description": "Swimming seasons definition",
+      "required": [
+        "season_id",
+        "season_name",
+        "season_start",
+        "season_end"
+      ],
+      "properties": {
+        "season_id": {
+          "description": "Season ID (00-99)\n\nNote:\nThis is a Primary Key.<pk/>",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "season_name": {
+          "format": "character varying",
+          "maxLength": 100,
+          "type": "string"
+        },
+        "season_start": {
+          "format": "date",
+          "type": "string"
+        },
+        "season_end": {
+          "format": "date",
+          "type": "string"
+        },
+        "created_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        },
+        "updated_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "events": {
+      "description": "Table of the events for every meet",
+      "required": [
+        "ms_id"
+      ],
+      "properties": {
+        "ms_id": {
+          "description": "Note:\nThis is a Primary Key.<pk/>",
+          "format": "bigint",
+          "type": "integer"
+        },
+        "meet_id": {
+          "description": "Note:\nThis is a Foreign Key to `meets.meet_id`.<fk table='meets' column='meet_id'/>",
+          "format": "integer",
+          "type": "integer"
+        },
+        "event_numb": {
+          "format": "smallint",
+          "type": "integer"
+        },
+        "ms_race_id": {
+          "description": "Note:\nThis is a Foreign Key to `_races.race_id`.<fk table='_races' column='race_id'/>",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "gender": {
+          "format": "character varying",
+          "type": "string"
+        },
+        "ms_cat": {
+          "format": "character varying",
+          "type": "string"
+        },
+        "created_at": {
+          "default": "now()",
+          "format": "timestamp without time zone",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "_categories": {
+      "description": "Swimming categories based on age and gender",
+      "required": [
+        "cat_id",
+        "cat_name",
+        "age",
+        "gender"
+      ],
+      "properties": {
+        "cat_id": {
+          "description": "Category ID (00-99)\n\nNote:\nThis is a Primary Key.<pk/>",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "cat_name": {
+          "description": "Category abbreviation (2 letters)",
+          "format": "character varying",
+          "maxLength": 3,
+          "type": "string"
+        },
+        "age": {
+          "format": "smallint",
+          "type": "integer"
+        },
+        "gender": {
+          "description": "M for Male, W for Women",
+          "format": "character",
+          "maxLength": 1,
+          "type": "string"
+        },
+        "group": {
+          "format": "character varying",
+          "maxLength": 4,
+          "type": "string"
+        },
+        "created_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        },
+        "updated_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "roster": {
+      "description": "Season-dependent athlete group and category assignments",
+      "required": [
+        "roster_id",
+        "fincode",
+        "season_id"
+      ],
+      "properties": {
+        "roster_id": {
+          "description": "Note:\nThis is a Primary Key.<pk/>",
+          "format": "bigint",
+          "type": "integer"
+        },
+        "fincode": {
+          "description": "Reference to athlete\n\nNote:\nThis is a Foreign Key to `athletes.fincode`.<fk table='athletes' column='fincode'/>",
+          "format": "integer",
+          "type": "integer"
+        },
+        "season_id": {
+          "description": "Reference to season\n\nNote:\nThis is a Foreign Key to `_seasons.season_id`.<fk table='_seasons' column='season_id'/>",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "group": {
+          "format": "character varying",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "created_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        },
+        "updated_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        },
+        "rost_cat_id": {
+          "description": "Codice della categoria\n\nNote:\nThis is a Foreign Key to `_categories.cat_id`.<fk table='_categories' column='cat_id'/>",
+          "format": "smallint",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "attendance": {
+      "description": "Athlete attendance tracking for training sessions",
+      "required": [
+        "att_id",
+        "sess_id",
+        "fincode",
+        "status_code"
+      ],
+      "properties": {
+        "att_id": {
+          "description": "Note:\nThis is a Primary Key.<pk/>",
+          "format": "bigint",
+          "type": "integer"
+        },
+        "sess_id": {
+          "description": "Note:\nThis is a Foreign Key to `sessions.sess_id`.<fk table='sessions' column='sess_id'/>",
+          "format": "bigint",
+          "type": "integer"
+        },
+        "fincode": {
+          "description": "Note:\nThis is a Foreign Key to `athletes.fincode`.<fk table='athletes' column='fincode'/>",
+          "format": "integer",
+          "type": "integer"
+        },
+        "status_code": {
+          "description": "Attendance status: present, late, absent, justified\n\nNote:\nThis is a Foreign Key to `_status.status_id`.<fk table='_status' column='status_id'/>",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "created_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        },
+        "updated_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "sessions": {
+      "description": "Training sessions",
+      "required": [
+        "sess_id",
+        "date",
+        "time"
+      ],
+      "properties": {
+        "sess_id": {
+          "description": "Note:\nThis is a Primary Key.<pk/>",
+          "format": "bigint",
+          "type": "integer"
+        },
+        "date": {
+          "format": "date",
+          "type": "string"
+        },
+        "time": {
+          "format": "time without time zone",
+          "type": "string"
+        },
+        "type": {
+          "description": "Type: swim, gym, or other",
+          "format": "character varying",
+          "maxLength": 20,
+          "type": "string"
+        },
+        "sector": {
+          "description": "Training focus: endurance, speed, technique, etc.",
+          "format": "character varying",
+          "maxLength": 100,
+          "type": "string"
+        },
+        "description": {
+          "format": "text",
+          "type": "string"
+        },
+        "volume": {
+          "description": "Training volume in meters (00000-99999)",
+          "format": "integer",
+          "type": "integer"
+        },
+        "location": {
+          "format": "character varying",
+          "maxLength": 100,
+          "type": "string"
+        },
+        "pool_name": {
+          "format": "character varying",
+          "maxLength": 100,
+          "type": "string"
+        },
+        "sess_course": {
+          "description": "1 for 50m pool, 2 for 25m pool",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "created_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        },
+        "updated_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "_status": {
+      "required": [
+        "status_id",
+        "description"
+      ],
+      "properties": {
+        "status_id": {
+          "description": "Note:\nThis is a Primary Key.<pk/>",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "description": {
+          "format": "character varying",
+          "maxLength": 100,
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "meets": {
+      "description": "Swimming competitions/meets",
+      "required": [
+        "meet_id",
+        "meet_name",
+        "min_date",
+        "max_date",
+        "meet_course"
+      ],
+      "properties": {
+        "meet_id": {
+          "description": "Meet ID (000-999)\n\nNote:\nThis is a Primary Key.<pk/>",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "meet_name": {
+          "format": "character varying",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "pool_name": {
+          "format": "character varying",
+          "maxLength": 100,
+          "type": "string"
+        },
+        "place": {
+          "format": "character varying",
+          "maxLength": 100,
+          "type": "string"
+        },
+        "nation": {
+          "description": "ISO 3-letter country code",
+          "format": "character varying",
+          "maxLength": 3,
+          "type": "string"
+        },
+        "min_date": {
+          "format": "date",
+          "type": "string"
+        },
+        "max_date": {
+          "format": "date",
+          "type": "string"
+        },
+        "meet_course": {
+          "description": "1 for 50m pool, 2 for 25m pool",
+          "format": "smallint",
+          "type": "integer"
+        },
+        "meet_groups": {
+          "description": "Array of participating groups",
+          "format": "text[]",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "created_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        },
+        "updated_at": {
+          "default": "now()",
+          "format": "timestamp with time zone",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "parameters": {
+    "preferParams": {
+      "name": "Prefer",
+      "description": "Preference",
+      "required": false,
+      "in": "header",
+      "type": "string"
+    },
+    "preferReturn": {
+      "name": "Prefer",
+      "description": "Preference",
+      "required": false,
+      "enum": [
+        "return=representation",
+        "return=minimal",
+        "return=none"
+      ],
+      "in": "header",
+      "type": "string"
+    },
+    "preferCount": {
+      "name": "Prefer",
+      "description": "Preference",
+      "required": false,
+      "enum": [
+        "count=none"
+      ],
+      "in": "header",
+      "type": "string"
+    },
+    "preferPost": {
+      "name": "Prefer",
+      "description": "Preference",
+      "required": false,
+      "enum": [
+        "return=representation",
+        "return=minimal",
+        "return=none",
+        "resolution=ignore-duplicates",
+        "resolution=merge-duplicates"
+      ],
+      "in": "header",
+      "type": "string"
+    },
+    "select": {
+      "name": "select",
+      "description": "Filtering Columns",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "on_conflict": {
+      "name": "on_conflict",
+      "description": "On Conflict",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "order": {
+      "name": "order",
+      "description": "Ordering",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "range": {
+      "name": "Range",
+      "description": "Limiting and Pagination",
+      "required": false,
+      "in": "header",
+      "type": "string"
+    },
+    "rangeUnit": {
+      "name": "Range-Unit",
+      "description": "Limiting and Pagination",
+      "required": false,
+      "default": "items",
+      "in": "header",
+      "type": "string"
+    },
+    "offset": {
+      "name": "offset",
+      "description": "Limiting and Pagination",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "limit": {
+      "name": "limit",
+      "description": "Limiting and Pagination",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body.splits": {
+      "name": "splits",
+      "description": "splits",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/splits"
+      }
+    },
+    "rowFilter.splits.splits_id": {
+      "name": "splits_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.splits.splits_res_id": {
+      "name": "splits_res_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.splits.distance": {
+      "name": "distance",
+      "description": "Distance at which split was taken (0000-9999 meters)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.splits.split_time": {
+      "name": "split_time",
+      "description": "Time in hundredths of a second (000000-999999)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.splits.created_at": {
+      "name": "created_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.splits.updated_at": {
+      "name": "updated_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body._limits": {
+      "name": "_limits",
+      "description": "_limits",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/_limits"
+      }
+    },
+    "rowFilter._limits.lim_id": {
+      "name": "lim_id",
+      "description": "Limit ID (000-999)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._limits.lim_course": {
+      "name": "lim_course",
+      "description": "1 for 50m pool, 2 for 25m pool",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._limits.lim_gender": {
+      "name": "lim_gender",
+      "description": "M for Male, W for Women",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._limits.lim_cat": {
+      "name": "lim_cat",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._limits.lim_race_id": {
+      "name": "lim_race_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._limits.lim_time_str": {
+      "name": "lim_time_str",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._limits.lim_time_sec": {
+      "name": "lim_time_sec",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._limits.lim_time_dec": {
+      "name": "lim_time_dec",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._limits.lim_season": {
+      "name": "lim_season",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._limits.note": {
+      "name": "note",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._limits.created_at": {
+      "name": "created_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._limits.updated_at": {
+      "name": "updated_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body._races": {
+      "name": "_races",
+      "description": "_races",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/_races"
+      }
+    },
+    "rowFilter._races.race_id": {
+      "name": "race_id",
+      "description": "Race ID (000-999)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._races.race_id_fin": {
+      "name": "race_id_fin",
+      "description": "FIN federation race ID (00-99)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._races.distance": {
+      "name": "distance",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._races.relay_count": {
+      "name": "relay_count",
+      "description": "Number of swimmers in relay (0 for individual)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._races.stroke_long_en": {
+      "name": "stroke_long_en",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._races.stroke_short_en": {
+      "name": "stroke_short_en",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._races.stroke_long_it": {
+      "name": "stroke_long_it",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._races.stroke_short_it": {
+      "name": "stroke_short_it",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._races.stroke_long_de": {
+      "name": "stroke_long_de",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._races.stroke_short_de": {
+      "name": "stroke_short_de",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._races.created_at": {
+      "name": "created_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._races.updated_at": {
+      "name": "updated_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body.athletes": {
+      "name": "athletes",
+      "description": "athletes",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/athletes"
+      }
+    },
+    "rowFilter.athletes.fincode": {
+      "name": "fincode",
+      "description": "FIN federation code (6 digits)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.athletes.firstname": {
+      "name": "firstname",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.athletes.lastname": {
+      "name": "lastname",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.athletes.birthdate": {
+      "name": "birthdate",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.athletes.gender": {
+      "name": "gender",
+      "description": "M for Male, W for Women",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.athletes.email": {
+      "name": "email",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.athletes.phone": {
+      "name": "phone",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.athletes.created_at": {
+      "name": "created_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.athletes.updated_at": {
+      "name": "updated_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body.results": {
+      "name": "results",
+      "description": "results",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/results"
+      }
+    },
+    "rowFilter.results.res_id": {
+      "name": "res_id",
+      "description": "Result ID (6 digits)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.results.fincode": {
+      "name": "fincode",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.results.meet_id": {
+      "name": "meet_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.results.event_numb": {
+      "name": "event_numb",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.results.res_time_decimal": {
+      "name": "res_time_decimal",
+      "description": "Time in hundredths of a second (000000-999999)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.results.created_at": {
+      "name": "created_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.results.updated_at": {
+      "name": "updated_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body._seasons": {
+      "name": "_seasons",
+      "description": "_seasons",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/_seasons"
+      }
+    },
+    "rowFilter._seasons.season_id": {
+      "name": "season_id",
+      "description": "Season ID (00-99)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._seasons.season_name": {
+      "name": "season_name",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._seasons.season_start": {
+      "name": "season_start",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._seasons.season_end": {
+      "name": "season_end",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._seasons.created_at": {
+      "name": "created_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._seasons.updated_at": {
+      "name": "updated_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body.events": {
+      "name": "events",
+      "description": "events",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/events"
+      }
+    },
+    "rowFilter.events.ms_id": {
+      "name": "ms_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.events.meet_id": {
+      "name": "meet_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.events.event_numb": {
+      "name": "event_numb",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.events.ms_race_id": {
+      "name": "ms_race_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.events.gender": {
+      "name": "gender",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.events.ms_cat": {
+      "name": "ms_cat",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.events.created_at": {
+      "name": "created_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body._categories": {
+      "name": "_categories",
+      "description": "_categories",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/_categories"
+      }
+    },
+    "rowFilter._categories.cat_id": {
+      "name": "cat_id",
+      "description": "Category ID (00-99)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._categories.cat_name": {
+      "name": "cat_name",
+      "description": "Category abbreviation (2 letters)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._categories.age": {
+      "name": "age",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._categories.gender": {
+      "name": "gender",
+      "description": "M for Male, W for Women",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._categories.group": {
+      "name": "group",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._categories.created_at": {
+      "name": "created_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._categories.updated_at": {
+      "name": "updated_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body.roster": {
+      "name": "roster",
+      "description": "roster",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/roster"
+      }
+    },
+    "rowFilter.roster.roster_id": {
+      "name": "roster_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.roster.fincode": {
+      "name": "fincode",
+      "description": "Reference to athlete",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.roster.season_id": {
+      "name": "season_id",
+      "description": "Reference to season",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.roster.group": {
+      "name": "group",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.roster.created_at": {
+      "name": "created_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.roster.updated_at": {
+      "name": "updated_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.roster.rost_cat_id": {
+      "name": "rost_cat_id",
+      "description": "Codice della categoria",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body.attendance": {
+      "name": "attendance",
+      "description": "attendance",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/attendance"
+      }
+    },
+    "rowFilter.attendance.att_id": {
+      "name": "att_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.attendance.sess_id": {
+      "name": "sess_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.attendance.fincode": {
+      "name": "fincode",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.attendance.status_code": {
+      "name": "status_code",
+      "description": "Attendance status: present, late, absent, justified",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.attendance.created_at": {
+      "name": "created_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.attendance.updated_at": {
+      "name": "updated_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body.sessions": {
+      "name": "sessions",
+      "description": "sessions",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/sessions"
+      }
+    },
+    "rowFilter.sessions.sess_id": {
+      "name": "sess_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.sessions.date": {
+      "name": "date",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.sessions.time": {
+      "name": "time",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.sessions.type": {
+      "name": "type",
+      "description": "Type: swim, gym, or other",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.sessions.sector": {
+      "name": "sector",
+      "description": "Training focus: endurance, speed, technique, etc.",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.sessions.description": {
+      "name": "description",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.sessions.volume": {
+      "name": "volume",
+      "description": "Training volume in meters (00000-99999)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.sessions.location": {
+      "name": "location",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.sessions.pool_name": {
+      "name": "pool_name",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.sessions.sess_course": {
+      "name": "sess_course",
+      "description": "1 for 50m pool, 2 for 25m pool",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.sessions.created_at": {
+      "name": "created_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.sessions.updated_at": {
+      "name": "updated_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body._status": {
+      "name": "_status",
+      "description": "_status",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/_status"
+      }
+    },
+    "rowFilter._status.status_id": {
+      "name": "status_id",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter._status.description": {
+      "name": "description",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "body.meets": {
+      "name": "meets",
+      "description": "meets",
+      "required": false,
+      "in": "body",
+      "schema": {
+        "$ref": "#/definitions/meets"
+      }
+    },
+    "rowFilter.meets.meet_id": {
+      "name": "meet_id",
+      "description": "Meet ID (000-999)",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.meets.meet_name": {
+      "name": "meet_name",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.meets.pool_name": {
+      "name": "pool_name",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.meets.place": {
+      "name": "place",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.meets.nation": {
+      "name": "nation",
+      "description": "ISO 3-letter country code",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.meets.min_date": {
+      "name": "min_date",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.meets.max_date": {
+      "name": "max_date",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.meets.meet_course": {
+      "name": "meet_course",
+      "description": "1 for 50m pool, 2 for 25m pool",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.meets.meet_groups": {
+      "name": "meet_groups",
+      "description": "Array of participating groups",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.meets.created_at": {
+      "name": "created_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    },
+    "rowFilter.meets.updated_at": {
+      "name": "updated_at",
+      "required": false,
+      "in": "query",
+      "type": "string"
+    }
+  },
+  "externalDocs": {
+    "description": "PostgREST Documentation",
+    "url": "https://postgrest.org/en/v14/references/api.html"
+  }
+}

@@ -1,0 +1,47 @@
+-- =============================================================================
+-- Dolomites Swimming Database - ACTUAL SCHEMA REFERENCE
+-- =============================================================================
+-- 
+-- NOTE: This file was initially a template. The ACTUAL database schema has been
+-- retrieved from the live Supabase instance and documented in DATABASE_SCHEMA.md
+--
+-- For complete schema documentation including all tables, columns, types, and
+-- relationships, see: DATABASE_SCHEMA.md
+--
+-- Database URL: https://vupcplusmldrifueqpyp.supabase.co
+-- Schema retrieved: December 22, 2025
+--
+-- =============================================================================
+-- ACTUAL TABLES IN DATABASE:
+-- =============================================================================
+-- Core Tables:
+--   • athletes        - Athlete information (fincode, firstname, lastname, birthdate, etc.)
+--   • meets           - Competition/meet information
+--   • events          - Events within meets
+--   • results         - Competition results
+--   • splits          - Split times for results
+--   • sessions        - Training sessions
+--   • attendance      - Session attendance tracking
+--   • roster          - Team roster by season
+--
+-- Reference Tables (with _ prefix):
+--   • _races          - Race/event type definitions (multilingual)
+--   • _categories     - Age category definitions
+--   • _seasons        - Season definitions
+--   • _status         - Attendance status codes
+--   • _limits         - Qualifying time limits
+--
+-- =============================================================================
+-- IMPORTANT SCHEMA NOTES:
+-- =============================================================================
+-- 1. Athletes use 'fincode' as primary identifier (not id)
+-- 2. Meets use 'meet_id' as primary key (smallint)
+-- 3. Sessions use 'sess_id' for training sessions (not 'trainings' table)
+-- 4. All tables have created_at and updated_at timestamps
+-- 5. Reference tables use underscore prefix (_races, _categories, etc.)
+-- 6. Multilingual support for stroke names (en, it, de)
+--
+-- =============================================================================
+-- For detailed column information, data types, constraints, and relationships,
+-- please refer to DATABASE_SCHEMA.md
+-- =============================================================================
