@@ -5,6 +5,7 @@ import { Meets } from './pages/Meets'
 import { Athletes } from './pages/Athletes'
 import { Trainings } from './pages/Trainings'
 import { Tools } from './pages/Tools'
+import { Permillili } from './pages/Permillili'
 import { DatabaseTest } from './pages/DatabaseTest'
 import { SeasonProvider } from './contexts/SeasonContext'
 
@@ -19,6 +20,7 @@ function App() {
             <Route path="/athletes" element={<Athletes />} />
             <Route path="/trainings" element={<Trainings />} />
             <Route path="/tools" element={<Tools />} />
+            <Route path="/permillili" element={<Permillili />} />
             <Route path="/test" element={<DatabaseTest />} />
           </Routes>
         </DashboardLayout>

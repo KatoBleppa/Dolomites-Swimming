@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { Plus, Search, MapPin, Calendar, Trophy, ArrowLeft } from 'lucide-react'
 import type { Meet, Event, Result, Split, Athlete, Race, ResultStatus } from '@/types/database'
 import { useSeason } from '@/contexts/SeasonContext'
+import { RelayEntriesModal } from '@/components/RelayEntriesModal'
 
 interface Group {
   id: number
@@ -71,6 +72,7 @@ export function Meets() {
   const [availableAthletesForResult, setAvailableAthletesForResult] = useState<Athlete[]>([])
   const [splitInputs, setSplitInputs] = useState<{ distance: number; timeInput: string; splits_id?: number }[]>([])
   const [savingSplits, setSavingSplits] = useState(false)
+  const [addingRelayEntriesForEvent, setAddingRelayEntriesForEvent] = useState<EventWithRace | null>(null)
 
   useEffect(() => {
     if (selectedSeason) {
@@ -444,13 +446,9 @@ export function Meets() {
         }
       }
 
-      // Close splits modal and refresh results view
+      // Close splits modal - no need to refresh results view
       setSelectedResult(null)
       setSplitInputs([])
-      
-      if (selectedMeet) {
-        await handleViewResults(selectedMeet)
-      }
       
     } catch (error) {
       console.error('Error saving splits:', error)
@@ -619,21 +617,7 @@ export function Meets() {
       setMeetEvents(eventsWithRaces)
 
       // Fetch entry counts for all events
-      const { data: entriesData, error: entriesError } = await supabase
-        .from('results')
-        .select('event_numb')
-        .eq('meet_id', meet.meet_id)
-
-      if (entriesError) {
-        console.error('Entries error:', entriesError)
-      } else {
-        // Count entries per event
-        const counts = new Map<number, number>()
-        entriesData?.forEach(entry => {
-          counts.set(entry.event_numb, (counts.get(entry.event_numb) || 0) + 1)
-        })
-        setEventEntryCounts(counts)
-      }
+      await fetchEventEntryCounts(meet.meet_id)
 
       // Fetch filtered races for the dropdown (based on current filter)
       const relayCount = raceTypeFilter === 'IND' ? 1 : 4
@@ -785,6 +769,14 @@ export function Meets() {
   }
 
   async function handleAddEntriesForEvent(event: EventWithRace) {
+    // Check if this is a relay event
+    if (event.race && event.race.relay_count > 1) {
+      // Open relay modal
+      setAddingRelayEntriesForEvent(event)
+      return
+    }
+    
+    // Open individual entries modal
     setAddingEntriesForEvent(event)
     setLoadingEventAthletes(true)
     setSelectedAthletes(new Set())
@@ -917,19 +909,7 @@ export function Meets() {
       }
       
       // Refresh entry counts for the events list
-      const { data: entriesData, error: entriesError } = await supabase
-        .from('results')
-        .select('event_numb')
-        .eq('meet_id', selectedMeet.meet_id)
-
-      if (!entriesError) {
-        // Count entries per event
-        const counts = new Map<number, number>()
-        entriesData?.forEach(entry => {
-          counts.set(entry.event_numb, (counts.get(entry.event_numb) || 0) + 1)
-        })
-        setEventEntryCounts(counts)
-      }
+      await fetchEventEntryCounts(selectedMeet.meet_id)
       
       // Close modal
       setAddingEntriesForEvent(null)
@@ -949,6 +929,43 @@ export function Meets() {
     setAddingEntriesForEvent(null)
     setSelectedAthletes(new Set())
     setEventAthletes([])
+  }
+
+  async function fetchEventEntryCounts(meetId: number) {
+    try {
+      const { data: entriesData, error } = await supabase
+        .from('results')
+        .select('event_numb')
+        .eq('meet_id', meetId)
+
+      if (error) {
+        console.error('Error fetching entry counts:', error)
+        return
+      }
+
+      // Count entries per event (individual results)
+      const counts = new Map<number, number>()
+      entriesData?.forEach(entry => {
+        counts.set(entry.event_numb, (counts.get(entry.event_numb) || 0) + 1)
+      })
+
+      // Also fetch relay entries
+      const { data: relayData, error: relayError } = await supabase
+        .from('relay_results')
+        .select('event_numb')
+        .eq('meet_id', meetId)
+
+      if (!relayError) {
+        // Count relay entries per event (each relay entry counts as one team)
+        relayData?.forEach(entry => {
+          counts.set(entry.event_numb, (counts.get(entry.event_numb) || 0) + 1)
+        })
+      }
+
+      setEventEntryCounts(counts)
+    } catch (error) {
+      console.error('Error fetching entry counts:', error)
+    }
   }
 
   async function handleEditResult(result: ResultWithAthlete) {
@@ -982,10 +999,15 @@ export function Meets() {
 
       if (error) throw error
 
-      // Refresh results
-      if (selectedMeet) {
-        await handleViewResults(selectedMeet)
-      }
+      // Update local state instead of refetching
+      const formattedTime = milliseconds > 0 ? await formatTimeWithSupabase(milliseconds) : ''
+      setResults(prevResults => 
+        prevResults.map(r => 
+          r.res_id === editingResult.res_id 
+            ? { ...r, res_time_decimal: milliseconds, result_status: statusToUse, formattedTime }
+            : r
+        )
+      )
       
       setEditingResult(null)
       setResultTimeInput('')
@@ -1008,10 +1030,10 @@ export function Meets() {
 
       if (error) throw error
 
-      // Refresh results
-      if (selectedMeet) {
-        await handleViewResults(selectedMeet)
-      }
+      // Update local state instead of refetching
+      setResults(prevResults => 
+        prevResults.filter(r => r.res_id !== result.res_id)
+      )
     } catch (error) {
       console.error('Error deleting result:', error)
       alert('Failed to delete result')
@@ -1061,7 +1083,7 @@ export function Meets() {
     }
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('results')
         .insert([{
           fincode: newResultForm.fincode,
@@ -1071,11 +1093,26 @@ export function Meets() {
           result_status: statusToUse,
           entry_time_decimal: 0
         }])
+        .select()
 
       if (error) throw error
 
-      // Refresh results
-      await handleViewResults(selectedMeet)
+      // Get athlete info and format time
+      const athlete = availableAthletesForResult.find(a => a.fincode === newResultForm.fincode)
+      const event = events.find(e => e.event_numb === creatingResult.event_numb)
+      const formattedTime = milliseconds > 0 ? await formatTimeWithSupabase(milliseconds) : ''
+      
+      // Add to local state instead of refetching
+      if (data && data.length > 0) {
+        const newResult: ResultWithAthlete = {
+          ...data[0],
+          athlete,
+          event,
+          race: event?.race,
+          formattedTime
+        }
+        setResults(prevResults => [...prevResults, newResult])
+      }
       
       setCreatingResult(null)
       setNewResultForm({ fincode: 0, timeInput: '' })
@@ -1424,44 +1461,41 @@ export function Meets() {
                   No eligible athletes found for this event
                 </div>
               ) : (
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {eventAthletes.map((athlete) => {
                     const isSelected = selectedAthletes.has(athlete.fincode)
                     
                     return (
                       <div
                         key={athlete.fincode}
-                        className={`flex items-center justify-between p-2 rounded-lg border-2 transition-all cursor-pointer ${
+                        className={`flex items-center justify-between p-1.5 px-2 rounded border transition-all cursor-pointer ${
                           isSelected 
                             ? 'bg-primary/10 border-primary' 
-                            : 'bg-muted/30 border-transparent hover:bg-muted/50'
+                            : 'bg-muted/20 border-transparent hover:bg-muted/40'
                         }`}
                         onClick={() => toggleAthleteSelection(athlete.fincode)}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
                           <input
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => {}}
-                            className="w-4 h-4 rounded"
+                            className="w-3.5 h-3.5 rounded flex-shrink-0"
                           />
-                          <div>
-                            <p className="text-sm font-semibold">
+                          <div className="flex items-baseline gap-2 min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate">
                               {athlete.firstname} {athlete.lastname}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              FIN: {athlete.fincode} • {athlete.gender}
+                            <p className="text-xs text-muted-foreground flex-shrink-0">
+                              {athlete.fincode}
                             </p>
                           </div>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right flex-shrink-0 ml-2">
                           {athlete.personalBest ? (
-                            <>
-                              <p className="text-xs font-medium text-muted-foreground">PB</p>
-                              <p className="text-base font-bold font-mono">
-                                {athlete.formattedPersonalBest || formatTime(athlete.personalBest)}
-                              </p>
-                            </>
+                            <p className="text-sm font-mono font-semibold">
+                              {athlete.formattedPersonalBest || formatTime(athlete.personalBest)}
+                            </p>
                           ) : (
                             <p className="text-xs text-muted-foreground italic">No PB</p>
                           )}
@@ -2163,6 +2197,22 @@ export function Meets() {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {/* Relay Entries Modal */}
+      {addingRelayEntriesForEvent && selectedMeet && selectedSeason && (
+        <RelayEntriesModal
+          event={addingRelayEntriesForEvent}
+          meet={selectedMeet}
+          seasonId={selectedSeason.season_id}
+          onClose={() => setAddingRelayEntriesForEvent(null)}
+          onSave={() => {
+            // Refresh entry counts
+            if (selectedMeet) {
+              fetchEventEntryCounts(selectedMeet.meet_id)
+            }
+          }}
+        />
       )}
     </div>
   )

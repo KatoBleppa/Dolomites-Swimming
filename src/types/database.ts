@@ -222,3 +222,24 @@ export interface Limit {
   created_at: string
   updated_at: string
 }
+
+export interface RelayResult {
+  relay_result_id: number
+  meet_id: number
+  event_numb: number
+  relay_name: string
+  leg1_fincode: number
+  leg1_entry_time: number
+  leg1_res_time: number
+  leg2_fincode: number
+  leg2_entry_time: number
+  leg2_res_time: number
+  leg3_fincode: number
+  leg3_entry_time: number
+  leg3_res_time: number
+  leg4_fincode: number
+  leg4_entry_time: number
+  leg4_res_time: number
+  created_at: string
+  updated_at: string
+}

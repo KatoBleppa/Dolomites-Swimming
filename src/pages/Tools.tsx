@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Calculator, Clock, Award, BarChart3 } from 'lucide-react'
+import { Calculator, Clock, Award, BarChart3, Hash } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const tools = [
   {
@@ -8,28 +9,47 @@ const tools = [
     description: 'Calculate swim paces for different distances',
     icon: Calculator,
     action: 'Open Calculator',
+    path: null,
   },
   {
     title: 'Time Converter',
     description: 'Convert between different time formats',
     icon: Clock,
     action: 'Open Converter',
+    path: null,
   },
   {
     title: 'Meet Results',
     description: 'Analyze and compare meet results',
     icon: Award,
     action: 'View Results',
+    path: null,
   },
   {
     title: 'Performance Analytics',
     description: 'Track athlete performance over time',
     icon: BarChart3,
     action: 'View Analytics',
+    path: null,
+  },
+  {
+    title: 'Permillili',
+    description: 'Show the best points for every swimmer',
+    icon: Hash,
+    action: 'View Permillili',
+    path: '/permillili',
   },
 ]
 
 export function Tools() {
+  const navigate = useNavigate()
+
+  const handleToolClick = (path: string | null) => {
+    if (path) {
+      navigate(path)
+    }
+  }
+
   return (
     <div>
       <div className="mb-8">
@@ -52,7 +72,12 @@ export function Tools() {
               <CardDescription>{tool.description}</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => handleToolClick(tool.path)}
+                disabled={!tool.path}
+              >
                 {tool.action}
               </Button>
             </CardContent>
