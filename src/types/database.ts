@@ -144,6 +144,8 @@ export interface Session {
   location: string
   pool_name: string
   sess_course: number
+  sess_group_id?: number
+  group_name?: string
   created_at: string
   updated_at: string
 }

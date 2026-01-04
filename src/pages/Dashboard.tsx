@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Trophy, Users, Calendar, Activity } from 'lucide-react'
+import { Trophy, Users, Calendar, Activity, Waves, Dumbbell } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useSeason } from '@/contexts/SeasonContext'
@@ -11,7 +11,8 @@ export function Dashboard() {
   const [stats, setStats] = useState({
     athletes: 0,
     meets: 0,
-    sessions: 0,
+    swimSessions: 0,
+    gymSessions: 0,
     results: 0,
     loading: true
   })
@@ -44,23 +45,43 @@ export function Dashboard() {
         .gte('min_date', selectedSeason.season_start)
         .lte('max_date', selectedSeason.season_end)
 
-      // Get sessions count (filtered by season date range)
-      const { count: sessionsCount } = await supabase
+      // Get swim sessions count (filtered by season date range)
+      const { count: swimSessionsCount } = await supabase
         .from('sessions')
         .select('sess_id', { count: 'exact', head: true })
         .gte('date', selectedSeason.season_start)
         .lte('date', selectedSeason.season_end)
+        .eq('type', 'Swim')
+
+      // Get gym sessions count (filtered by season date range)
+      const { count: gymSessionsCount } = await supabase
+        .from('sessions')
+        .select('sess_id', { count: 'exact', head: true })
+        .gte('date', selectedSeason.season_start)
+        .lte('date', selectedSeason.season_end)
+        .eq('type', 'Gym')
+
+      // Get meets in season first
+      const { data: seasonMeets } = await supabase
+        .from('meets')
+        .select('meet_id')
+        .gte('min_date', selectedSeason.season_start)
+        .lte('max_date', selectedSeason.season_end)
+
+      const meetIds = seasonMeets?.map(m => m.meet_id) || []
 
       // Get results count (only for athletes in roster and meets in season)
       const { count: resultsCount } = await supabase
         .from('results')
         .select('res_id', { count: 'exact', head: true })
         .in('fincode', fincodes.length > 0 ? fincodes : [-1])
+        .in('meet_id', meetIds.length > 0 ? meetIds : [-1])
 
       setStats({
         athletes: athletesCount,
         meets: meetsCount || 0,
-        sessions: sessionsCount || 0,
+        swimSessions: swimSessionsCount || 0,
+        gymSessions: gymSessionsCount || 0,
         results: resultsCount || 0,
         loading: false
       })
@@ -88,12 +109,20 @@ export function Dashboard() {
       count: stats.meets,
     },
     {
-      title: 'Training Sessions',
-      description: 'Scheduled trainings',
-      icon: Calendar,
+      title: 'Swim Sessions',
+      description: 'Swimming trainings',
+      icon: Waves,
       href: '/trainings',
-      color: 'text-orange-500',
-      count: stats.sessions,
+      color: 'text-blue-500',
+      count: stats.swimSessions,
+    },
+    {
+      title: 'Gym Sessions',
+      description: 'Gym trainings',
+      icon: Dumbbell,
+      href: '/trainings',
+      color: 'text-amber-500',
+      count: stats.gymSessions,
     },
     {
       title: 'Results',
@@ -114,7 +143,7 @@ export function Dashboard() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-5 mb-8">
         {dashboardCards.map((card) => (
           <div 
             key={card.href}

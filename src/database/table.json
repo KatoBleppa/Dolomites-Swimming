@@ -1,0 +1,802 @@
+[
+  {
+    "table_name": "_categories",
+    "column_name": "cat_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "_categories",
+    "column_name": "cat_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_categories",
+    "column_name": "cat_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_categories",
+    "column_name": "cat_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_categories",
+    "column_name": "cat_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "_categories",
+    "column_name": "cat_name",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_categories",
+    "column_name": "age",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "_categories",
+    "column_name": "cat_gender",
+    "data_type": "character",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "_categories",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "_categories",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "_categories",
+    "column_name": "cat_group_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_groups",
+    "column_name": "id",
+    "data_type": "bigint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "_groups",
+    "column_name": "id",
+    "data_type": "bigint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_groups",
+    "column_name": "id",
+    "data_type": "bigint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_name": "_groups",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "_groups",
+    "column_name": "group_name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_limits",
+    "column_name": "lim_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "_limits",
+    "column_name": "lim_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "_limits",
+    "column_name": "lim_course",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "_limits",
+    "column_name": "lim_gender",
+    "data_type": "character",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "_limits",
+    "column_name": "lim_cat",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_limits",
+    "column_name": "lim_race_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_limits",
+    "column_name": "lim_time_dec",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_limits",
+    "column_name": "note",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_limits",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "_limits",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "_limits",
+    "column_name": "lim_season_id",
+    "data_type": "smallint",
+    "is_nullable": "YES",
+    "column_default": "'0'::smallint",
+    "constraint_type": null
+  },
+  {
+    "table_name": "_races",
+    "column_name": "race_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_races",
+    "column_name": "race_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "_races",
+    "column_name": "race_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "_races",
+    "column_name": "race_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_races",
+    "column_name": "race_id_fin",
+    "data_type": "smallint",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "_races",
+    "column_name": "race_id_fin",
+    "data_type": "smallint",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_name": "_races",
+    "column_name": "distance",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "_races",
+    "column_name": "relay_count",
+    "data_type": "smallint",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "_races",
+    "column_name": "stroke_long_en",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_races",
+    "column_name": "stroke_short_en",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_races",
+    "column_name": "stroke_long_it",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_races",
+    "column_name": "stroke_short_it",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_races",
+    "column_name": "stroke_long_de",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_races",
+    "column_name": "stroke_short_de",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_races",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "_races",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "_seasons",
+    "column_name": "season_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "_seasons",
+    "column_name": "season_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "_seasons",
+    "column_name": "season_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_seasons",
+    "column_name": "season_name",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_seasons",
+    "column_name": "season_start",
+    "data_type": "date",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "_seasons",
+    "column_name": "season_end",
+    "data_type": "date",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "_seasons",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "_seasons",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "_status",
+    "column_name": "status_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "_status",
+    "column_name": "status_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "_status",
+    "column_name": "description",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "fincode",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "fincode",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "fincode",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "fincode",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "fincode",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "fincode",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "fincode",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "fincode",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "fincode",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "firstname",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "lastname",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "birthdate",
+    "data_type": "date",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "gender",
+    "data_type": "character",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "email",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "phone",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "athletes",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "att_id",
+    "data_type": "bigint",
+    "is_nullable": "NO",
+    "column_default": "nextval('attendance_att_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "sess_id",
+    "data_type": "bigint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "fincode",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "UNIQUE"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "status_code",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "events",
+    "column_name": "ms_id",
+    "data_type": "bigint",
+    "is_nullable": "NO",
+    "column_default": "nextval('events_ms_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "events",
+    "column_name": "meet_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "events",
+    "column_name": "event_numb",
+    "data_type": "smallint",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "events",
+    "column_name": "ms_race_id",
+    "data_type": "smallint",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "events",
+    "column_name": "gender",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "events",
+    "column_name": "ms_group_id",
+    "data_type": "smallint",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "events",
+    "column_name": "created_at",
+    "data_type": "timestamp without time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  },
+  {
+    "table_name": "meet_groups",
+    "column_name": "meet_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "meet_groups",
+    "column_name": "group_id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "meets",
+    "column_name": "meet_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": "nextval('meets_meet_id_seq'::regclass)",
+    "constraint_type": null
+  },
+  {
+    "table_name": "meets",
+    "column_name": "meet_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": "nextval('meets_meet_id_seq'::regclass)",
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "meets",
+    "column_name": "meet_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": "nextval('meets_meet_id_seq'::regclass)",
+    "constraint_type": "PRIMARY KEY"
+  },
+  {
+    "table_name": "meets",
+    "column_name": "meet_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": "nextval('meets_meet_id_seq'::regclass)",
+    "constraint_type": null
+  },
+  {
+    "table_name": "meets",
+    "column_name": "meet_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": "nextval('meets_meet_id_seq'::regclass)",
+    "constraint_type": null
+  },
+  {
+    "table_name": "meets",
+    "column_name": "meet_id",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": "nextval('meets_meet_id_seq'::regclass)",
+    "constraint_type": null
+  },
+  {
+    "table_name": "meets",
+    "column_name": "meet_name",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "meets",
+    "column_name": "pool_name",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "meets",
+    "column_name": "place",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "meets",
+    "column_name": "nation",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null,
+    "constraint_type": null
+  },
+  {
+    "table_name": "meets",
+    "column_name": "min_date",
+    "data_type": "date",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "meets",
+    "column_name": "max_date",
+    "data_type": "date",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "meets",
+    "column_name": "meet_course",
+    "data_type": "smallint",
+    "is_nullable": "NO",
+    "column_default": null,
+    "constraint_type": "CHECK"
+  },
+  {
+    "table_name": "meets",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()",
+    "constraint_type": null
+  }
+]

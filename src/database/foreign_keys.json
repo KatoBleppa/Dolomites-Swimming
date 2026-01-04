@@ -1,0 +1,128 @@
+[
+  {
+    "table_name": "_limits",
+    "column_name": "lim_cat",
+    "foreign_table_name": "_categories",
+    "foreign_column_name": "cat_id"
+  },
+  {
+    "table_name": "_limits",
+    "column_name": "lim_race_id",
+    "foreign_table_name": "_races",
+    "foreign_column_name": "race_id"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "fincode",
+    "foreign_table_name": "athletes",
+    "foreign_column_name": "fincode"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "sess_id",
+    "foreign_table_name": "sessions",
+    "foreign_column_name": "sess_id"
+  },
+  {
+    "table_name": "attendance",
+    "column_name": "status_code",
+    "foreign_table_name": "_status",
+    "foreign_column_name": "status_id"
+  },
+  {
+    "table_name": "events",
+    "column_name": "meet_id",
+    "foreign_table_name": "meets",
+    "foreign_column_name": "meet_id"
+  },
+  {
+    "table_name": "events",
+    "column_name": "ms_group_id",
+    "foreign_table_name": "_groups",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_name": "events",
+    "column_name": "ms_race_id",
+    "foreign_table_name": "_races",
+    "foreign_column_name": "race_id"
+  },
+  {
+    "table_name": "meet_groups",
+    "column_name": "group_id",
+    "foreign_table_name": "_categories",
+    "foreign_column_name": "cat_id"
+  },
+  {
+    "table_name": "meet_groups",
+    "column_name": "meet_id",
+    "foreign_table_name": "meets",
+    "foreign_column_name": "meet_id"
+  },
+  {
+    "table_name": "relay_results",
+    "column_name": "leg1_fincode",
+    "foreign_table_name": "athletes",
+    "foreign_column_name": "fincode"
+  },
+  {
+    "table_name": "relay_results",
+    "column_name": "leg2_fincode",
+    "foreign_table_name": "athletes",
+    "foreign_column_name": "fincode"
+  },
+  {
+    "table_name": "relay_results",
+    "column_name": "leg3_fincode",
+    "foreign_table_name": "athletes",
+    "foreign_column_name": "fincode"
+  },
+  {
+    "table_name": "relay_results",
+    "column_name": "leg4_fincode",
+    "foreign_table_name": "athletes",
+    "foreign_column_name": "fincode"
+  },
+  {
+    "table_name": "relay_results",
+    "column_name": "meet_id",
+    "foreign_table_name": "meets",
+    "foreign_column_name": "meet_id"
+  },
+  {
+    "table_name": "results",
+    "column_name": "fincode",
+    "foreign_table_name": "athletes",
+    "foreign_column_name": "fincode"
+  },
+  {
+    "table_name": "results",
+    "column_name": "meet_id",
+    "foreign_table_name": "meets",
+    "foreign_column_name": "meet_id"
+  },
+  {
+    "table_name": "roster",
+    "column_name": "fincode",
+    "foreign_table_name": "athletes",
+    "foreign_column_name": "fincode"
+  },
+  {
+    "table_name": "roster",
+    "column_name": "ros_cat_id",
+    "foreign_table_name": "_categories",
+    "foreign_column_name": "cat_id"
+  },
+  {
+    "table_name": "roster",
+    "column_name": "season_id",
+    "foreign_table_name": "_seasons",
+    "foreign_column_name": "season_id"
+  },
+  {
+    "table_name": "splits",
+    "column_name": "splits_res_id",
+    "foreign_table_name": "results",
+    "foreign_column_name": "res_id"
+  }
+]

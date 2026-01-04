@@ -4,6 +4,7 @@ import { Dashboard } from './pages/Dashboard'
 import { Meets } from './pages/Meets'
 import { Athletes } from './pages/Athletes'
 import { Trainings } from './pages/Trainings'
+import { Attendance } from './pages/Attendance'
 import { Tools } from './pages/Tools'
 import { Permillili } from './pages/Permillili'
 import { DatabaseTest } from './pages/DatabaseTest'
@@ -19,6 +20,7 @@ function App() {
             <Route path="/meets" element={<Meets />} />
             <Route path="/athletes" element={<Athletes />} />
             <Route path="/trainings" element={<Trainings />} />
+            <Route path="/attendance" element={<Attendance />} />
             <Route path="/tools" element={<Tools />} />
             <Route path="/permillili" element={<Permillili />} />
             <Route path="/test" element={<DatabaseTest />} />

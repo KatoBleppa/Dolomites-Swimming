@@ -7,6 +7,19 @@ import { Plus, Search, UserCircle, Mail, Calendar } from 'lucide-react'
 import type { Athlete } from '@/types/database'
 import { useSeason } from '@/contexts/SeasonContext'
 
+interface Group {
+  id: number
+  group_name: string
+}
+
+interface AthleteDetails extends Athlete {
+  season_id: number
+  ros_cat_id: number
+  cat_name: string
+  cat_group_id: number
+  group_name: string
+}
+
 // Function to get athlete photo URL
 function getAthletePhotoUrl(fincode: number): string {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -15,21 +28,41 @@ function getAthletePhotoUrl(fincode: number): string {
 
 export function Athletes() {
   const { selectedSeason } = useSeason()
-  const [athletes, setAthletes] = useState<Athlete[]>([])
+  const [athletes, setAthletes] = useState<AthleteDetails[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null)
+  const [selectedAthlete, setSelectedAthlete] = useState<AthleteDetails | null>(null)
   const [imageErrors, setImageErrors] = useState<Set<number>>(new Set())
+  const [groups, setGroups] = useState<Group[]>([])
+  const [selectedGroupId, setSelectedGroupId] = useState<number>(1)
 
   const handleImageError = (fincode: number) => {
     setImageErrors(prev => new Set(prev).add(fincode))
   }
 
   useEffect(() => {
+    fetchGroups()
+  }, [])
+
+  useEffect(() => {
     if (selectedSeason) {
       fetchAthletes()
     }
-  }, [selectedSeason])
+  }, [selectedSeason, selectedGroupId])
+
+  async function fetchGroups() {
+    try {
+      const { data, error } = await supabase
+        .from('_groups')
+        .select('id, group_name')
+        .order('id')
+
+      if (error) throw error
+      setGroups(data || [])
+    } catch (error) {
+      console.error('Error fetching groups:', error)
+    }
+  }
 
   async function fetchAthletes() {
     if (!selectedSeason) return
@@ -37,39 +70,17 @@ export function Athletes() {
     try {
       setLoading(true)
       
-      // First get the roster for this season
-      const { data: rosterData, error: rosterError } = await supabase
-        .from('roster')
-        .select('fincode')
-        .eq('season_id', selectedSeason.season_id)
-
-      if (rosterError) {
-        console.error('Error fetching roster:', rosterError)
-        throw rosterError
-      }
-
-      const fincodes = rosterData?.map(r => r.fincode) || []
-
-      if (fincodes.length === 0) {
-        console.log('No athletes in roster for this season')
-        setAthletes([])
-        return
-      }
-
-      // Then get the athletes for those fincodes
       const { data, error } = await supabase
-        .from('athletes')
-        .select('*')
-        .in('fincode', fincodes)
-        .order('lastname', { ascending: true })
+        .rpc('get_athletes_details', {
+          p_season_id: selectedSeason.season_id,
+          p_group_id: selectedGroupId
+        })
 
       if (error) {
         console.error('Error fetching athletes:', error)
-        console.error('Error details:', JSON.stringify(error, null, 2))
         throw error
       }
       
-      console.log('Athletes fetched successfully:', data?.length, 'records')
       setAthletes(data || [])
     } catch (error) {
       console.error('Error fetching athletes:', error)
@@ -98,15 +109,30 @@ export function Athletes() {
         </Button>
       </div>
 
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search athletes..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9"
-          />
+      <div className="mb-6 space-y-4">
+        <div className="flex gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search athletes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div className="w-64">
+            <select
+              value={selectedGroupId}
+              onChange={(e) => setSelectedGroupId(Number(e.target.value))}
+              className="w-full px-3 py-2 border border-input rounded-md bg-background text-sm"
+            >
+              {groups.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.group_name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

@@ -5,7 +5,8 @@ import {
   Users, 
   Dumbbell, 
   Wrench,
-  LayoutDashboard
+  LayoutDashboard,
+  CheckSquare
 } from 'lucide-react'
 import { useSeason } from '@/contexts/SeasonContext'
 import dolomitesLogo from '@/assets/dolomites-logo-2.gif'
@@ -15,6 +16,7 @@ const navigation = [
   { name: 'Meets', href: '/meets', icon: Trophy },
   { name: 'Athletes', href: '/athletes', icon: Users },
   { name: 'Trainings', href: '/trainings', icon: Dumbbell },
+  { name: 'Attendance', href: '/attendance', icon: CheckSquare },
   { name: 'Tools', href: '/tools', icon: Wrench },
 ]
 
