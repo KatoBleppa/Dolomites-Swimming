@@ -7,6 +7,7 @@ import { Trainings } from './pages/Trainings'
 import { Attendance } from './pages/Attendance'
 import { Tools } from './pages/Tools'
 import { Permillili } from './pages/Permillili'
+import { AttSumm } from './pages/AttSumm'
 import { DatabaseTest } from './pages/DatabaseTest'
 import { SeasonProvider } from './contexts/SeasonContext'
 
@@ -23,6 +24,7 @@ function App() {
             <Route path="/attendance" element={<Attendance />} />
             <Route path="/tools" element={<Tools />} />
             <Route path="/permillili" element={<Permillili />} />
+            <Route path="/attsumm" element={<AttSumm />} />
             <Route path="/test" element={<DatabaseTest />} />
           </Routes>
         </DashboardLayout>

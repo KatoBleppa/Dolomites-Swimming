@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Calculator, Clock, Award, BarChart3, Hash } from 'lucide-react'
+import { Calculator, Clock, Award, BarChart3, Hash, TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const tools = [
@@ -38,6 +38,13 @@ const tools = [
     icon: Hash,
     action: 'View Permillili',
     path: '/permillili',
+  },
+  {
+    title: 'Attendance Summary',
+    description: 'View attendance metrics summary',
+    icon: TrendingUp,
+    action: 'View Summary',
+    path: '/attsumm',
   },
 ]
 
