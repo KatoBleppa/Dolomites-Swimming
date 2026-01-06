@@ -68,7 +68,7 @@ export function DatabaseTest() {
 
     // Test connection
     try {
-      const { data, error } = await supabase.from('_races').select('*').limit(1)
+      const { error } = await supabase.from('_races').select('*').limit(1)
       results.connection = {
         success: !error,
         error: error?.message,

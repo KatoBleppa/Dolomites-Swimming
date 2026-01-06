@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Trophy, Users, Calendar, Activity, Waves, Dumbbell } from 'lucide-react'
+import { Trophy, Users, Activity, Waves, Dumbbell } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useSeason } from '@/contexts/SeasonContext'

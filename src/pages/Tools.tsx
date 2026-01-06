@@ -46,6 +46,13 @@ const tools = [
     action: 'View Summary',
     path: '/attsumm',
   },
+  {
+    title: 'Attendance Trend',
+    description: 'View detailed attendance trends over time',
+    icon: TrendingUp,
+    action: 'View Trend',
+    path: '/atttrend',
+  },
 ]
 
 export function Tools() {
