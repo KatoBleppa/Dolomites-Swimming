@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
-import { Hash, TrendingUp } from 'lucide-react'
+import { Hash, TrendingUp, Download } from 'lucide-react'
 import { useSeason } from '@/contexts/SeasonContext'
+import * as XLSX from 'xlsx'
 
 interface PermilliResult {
   res_id: number
@@ -79,12 +81,71 @@ export function Permillili() {
     }
   }
 
+  function exportToExcel() {
+    if (results.length === 0) return
+
+    // Prepare data for export
+    const exportData = results.map((result, index) => ({
+      'Rank': index + 1,
+      'First Name': result.athlete_firstname,
+      'Last Name': result.athlete_lastname,
+      'FIN Code': result.fincode,
+      'Gender': result.athlete_gender,
+      'Distance': result.race_distance,
+      'Stroke': result.race_stroke_short,
+      'Result': result.res_time_str,
+      'Limit': result.lim_time_str,
+      'Points': result.permillili,
+      'Meet': result.meet_name,
+      'Date': result.min_date,
+      'Course': course === 1 ? '50m' : '25m'
+    }))
+
+    // Create workbook and worksheet
+    const ws = XLSX.utils.json_to_sheet(exportData)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Permillili Rankings')
+
+    // Set column widths
+    const colWidths = [
+      { wch: 6 },  // Rank
+      { wch: 12 }, // First Name
+      { wch: 12 }, // Last Name
+      { wch: 10 }, // FIN Code
+      { wch: 8 },  // Gender
+      { wch: 10 }, // Distance
+      { wch: 10 }, // Stroke
+      { wch: 10 }, // Result
+      { wch: 10 }, // Limit
+      { wch: 8 },  // Points
+      { wch: 30 }, // Meet
+      { wch: 12 }, // Date
+      { wch: 8 }   // Course
+    ]
+    ws['!cols'] = colWidths
+
+    // Generate filename with season and course info
+    const courseType = course === 1 ? 'LC' : 'SC'
+    const filename = `Permillili_${currentSeason?.season_name}_${courseType}_${new Date().toISOString().split('T')[0]}.xlsx`
+    
+    // Save file
+    XLSX.writeFile(wb, filename)
+  }
+
   return (
     <div>
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <Hash className="h-10 w-10 text-primary" />
-          <h1 className="text-4xl font-bold tracking-tight">Permillili Rankings</h1>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <Hash className="h-10 w-10 text-primary" />
+            <h1 className="text-4xl font-bold tracking-tight">Permillili Rankings</h1>
+          </div>
+          {results.length > 0 && (
+            <Button onClick={exportToExcel} className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Export to Excel
+            </Button>
+          )}
         </div>
         <p className="text-muted-foreground">
           Best qualifying points for each swimmer
