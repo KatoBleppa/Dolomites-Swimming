@@ -53,6 +53,13 @@ const tools = [
     action: 'View Trend',
     path: '/atttrend',
   },
+  {
+    title: 'Personal Bests',
+    description: 'View best times for each swimmer in each race',
+    icon: Award,
+    action: 'View PBs',
+    path: '/pb',
+  },
 ]
 
 export function Tools() {

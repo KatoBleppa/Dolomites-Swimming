@@ -10,6 +10,7 @@ import { Permillili } from './pages/Permillili'
 import { AttSumm } from './pages/AttSumm'
 import { AttTrend } from './pages/AttTrend'
 import { DatabaseTest } from './pages/DatabaseTest'
+import { PB } from './pages/PB'
 import { SeasonProvider } from './contexts/SeasonContext'
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
             <Route path="/permillili" element={<Permillili />} />
             <Route path="/attsumm" element={<AttSumm />} />
             <Route path="/atttrend" element={<AttTrend />} />
+            <Route path="/pb" element={<PB />} />
             <Route path="/test" element={<DatabaseTest />} />
           </Routes>
         </DashboardLayout>
