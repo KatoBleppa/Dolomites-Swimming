@@ -723,7 +723,6 @@ export function ImportLenex() {
         
         for (const relay of relays) {
           const relayId = relay.getAttribute('relayid') || ''
-          const relayNumber = parseInt(relay.getAttribute('number') || '0')
           const relayGender = relay.getAttribute('gender') || ''
           
           // Create relay name from relay ID and gender (e.g., "1-M", "2-F")

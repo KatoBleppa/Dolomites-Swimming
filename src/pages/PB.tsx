@@ -45,7 +45,7 @@ export function PB() {
   const [selectedGroupId, setSelectedGroupId] = useState<number>(1)
   const [course, setCourse] = useState<number>(2) // Default to 25m
   const [races, setRaces] = useState<Race[]>([])
-  const [personalBests, setPersonalBests] = useState<PersonalBest[]>([])
+  const [_personalBests, setPersonalBests] = useState<PersonalBest[]>([])
   const [tableData, setTableData] = useState<AthleteRow[]>([])
 
   useEffect(() => {
