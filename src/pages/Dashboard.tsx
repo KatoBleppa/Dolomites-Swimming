@@ -146,7 +146,7 @@ export function Dashboard() {
       <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-5 mb-8">
         {dashboardCards.map((card) => (
           <div 
-            key={card.href}
+            key={card.title}
             className="cursor-pointer"
             onClick={() => navigate(card.href)}
           >

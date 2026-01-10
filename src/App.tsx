@@ -11,6 +11,7 @@ import { AttSumm } from './pages/AttSumm'
 import { AttTrend } from './pages/AttTrend'
 import { DatabaseTest } from './pages/DatabaseTest'
 import { PB } from './pages/PB'
+import { ImportLenex } from './pages/ImportLenex'
 import { SeasonProvider } from './contexts/SeasonContext'
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
             <Route path="/attsumm" element={<AttSumm />} />
             <Route path="/atttrend" element={<AttTrend />} />
             <Route path="/pb" element={<PB />} />
+            <Route path="/import-lenex" element={<ImportLenex />} />
             <Route path="/test" element={<DatabaseTest />} />
           </Routes>
         </DashboardLayout>

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Calculator, Clock, Award, BarChart3, Hash, TrendingUp } from 'lucide-react'
+import { Calculator, Clock, Award, BarChart3, Hash, TrendingUp, Upload } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const tools = [
@@ -59,6 +59,13 @@ const tools = [
     icon: Award,
     action: 'View PBs',
     path: '/pb',
+  },
+  {
+    title: 'Import Lenex',
+    description: 'Import meet results from Lenex XML files',
+    icon: Upload,
+    action: 'Import File',
+    path: '/import-lenex',
   },
 ]
 

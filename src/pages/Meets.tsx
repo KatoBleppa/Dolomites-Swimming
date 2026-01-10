@@ -25,6 +25,32 @@ interface ResultWithAthlete extends Result {
   formattedTime?: string
 }
 
+interface RelayResultWithEvent {
+  relay_result_id: number
+  meet_id: number
+  event_numb: number
+  relay_name: string
+  leg1_fincode: number
+  leg1_entry_time: number
+  leg1_res_time: number
+  leg2_fincode: number
+  leg2_entry_time: number
+  leg2_res_time: number
+  leg3_fincode: number
+  leg3_entry_time: number
+  leg3_res_time: number
+  leg4_fincode: number
+  leg4_entry_time: number
+  leg4_res_time: number
+  result_status?: string
+  created_at?: string
+  updated_at?: string
+  event?: EventWithRace
+  race?: Race
+  formattedTime?: string
+  totalTime?: number
+}
+
 interface SplitData {
   result: ResultWithAthlete
   splits: (Split & { formattedTime?: string })[]
@@ -39,7 +65,10 @@ export function Meets() {
   const [viewingResults, setViewingResults] = useState(false)
   const [events, setEvents] = useState<EventWithRace[]>([])
   const [results, setResults] = useState<ResultWithAthlete[]>([])
+  const [relayResults, setRelayResults] = useState<RelayResultWithEvent[]>([])
   const [selectedResult, setSelectedResult] = useState<SplitData | null>(null)
+  const [selectedRelayResult, setSelectedRelayResult] = useState<RelayResultWithEvent | null>(null)
+  const [relayAthletes, setRelayAthletes] = useState<Map<number, Athlete>>(new Map())
   const [loadingResults, setLoadingResults] = useState(false)
   const [editingMeet, setEditingMeet] = useState<Meet | null>(null)
   const [editForm, setEditForm] = useState<Partial<Meet>>({})
@@ -73,12 +102,32 @@ export function Meets() {
   const [splitInputs, setSplitInputs] = useState<{ distance: number; timeInput: string; splits_id?: number }[]>([])
   const [savingSplits, setSavingSplits] = useState(false)
   const [addingRelayEntriesForEvent, setAddingRelayEntriesForEvent] = useState<EventWithRace | null>(null)
+  const [allGroups, setAllGroups] = useState<Group[]>([])
+  const [selectedGroupIds, setSelectedGroupIds] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     if (selectedSeason) {
       fetchMeets()
     }
   }, [selectedSeason])
+
+  useEffect(() => {
+    // Load all groups on component mount
+    loadAllGroups()
+  }, [])
+
+  async function loadAllGroups() {
+    try {
+      const { data, error } = await supabase
+        .from('_groups')
+        .select('*')
+        .order('id', { ascending: true })
+      
+      if (error) throw error
+      setAllGroups(data || [])
+    } catch (error) {
+    }
+  }
 
   // Convert mmsshh to milliseconds
   function timeStringToMilliseconds(timeStr: string): number {
@@ -118,7 +167,6 @@ export function Meets() {
       if (error) throw error
       setMeets(data || [])
     } catch (error) {
-      console.error('Error fetching meets:', error)
     } finally {
       setLoading(false)
     }
@@ -140,7 +188,6 @@ export function Meets() {
         .rpc('get_meet_events_with_details', { p_meet_id: meet.meet_id })
 
       if (eventsError) {
-        console.error('Events error:', eventsError)
         throw eventsError
       }
 
@@ -179,7 +226,6 @@ export function Meets() {
         .order('res_time_decimal', { ascending: true })
 
       if (resultsError) {
-        console.error('Results error:', resultsError)
         throw resultsError
       }
 
@@ -191,7 +237,6 @@ export function Meets() {
         .in('fincode', fincodes)
 
       if (athletesError) {
-        console.error('Athletes error:', athletesError)
       }
 
       // Create athlete lookup map
@@ -216,11 +261,68 @@ export function Meets() {
       const resultsWithFormattedTimes = await formatTimesInResults(transformedResults)
       
       setResults(resultsWithFormattedTimes)
+
+      // Fetch relay results for this meet
+      const { data: relayResultsData, error: relayResultsError } = await supabase
+        .from('relay_results')
+        .select('*')
+        .eq('meet_id', meet.meet_id)
+        .order('event_numb', { ascending: true })
+
+      if (relayResultsError) {
+      } else {
+        // Combine relay results with event data and calculate total times
+        const transformedRelayResults = (relayResultsData || []).map((r: any) => {
+          const eventKey = `${r.meet_id}-${r.event_numb}`
+          const event = eventMap.get(eventKey)
+          // Calculate total time as sum of all leg times
+          const totalTime = (r.leg1_res_time || 0) + (r.leg2_res_time || 0) + (r.leg3_res_time || 0) + (r.leg4_res_time || 0)
+          return {
+            ...r,
+            event: event,
+            race: event?.race,
+            totalTime: totalTime
+          }
+        })
+        
+        // Sort by total time
+        transformedRelayResults.sort((a, b) => {
+          if (a.event_numb !== b.event_numb) return a.event_numb - b.event_numb
+          return (a.totalTime || 0) - (b.totalTime || 0)
+        })
+        
+        // Format times for relay results
+        const relayResultsWithFormattedTimes = await formatTimesInRelayResults(transformedRelayResults)
+        setRelayResults(relayResultsWithFormattedTimes)
+      }
     } catch (error) {
-      console.error('Error loading results:', error)
     } finally {
       setLoadingResults(false)
     }
+  }
+
+  async function handleViewRelaySplits(relayResult: RelayResultWithEvent) {
+    // Fetch athlete data for all legs
+    const fincodes = [
+      relayResult.leg1_fincode,
+      relayResult.leg2_fincode,
+      relayResult.leg3_fincode,
+      relayResult.leg4_fincode
+    ].filter(fc => fc && fc > 0)
+    
+    if (fincodes.length > 0) {
+      const { data: athletesData } = await supabase
+        .from('athletes')
+        .select('*')
+        .in('fincode', fincodes)
+      
+      if (athletesData) {
+        const athleteMap = new Map(athletesData.map(a => [a.fincode, a]))
+        setRelayAthletes(athleteMap)
+      }
+    }
+    
+    setSelectedRelayResult(relayResult)
   }
 
   async function handleViewSplits(result: ResultWithAthlete) {
@@ -286,7 +388,6 @@ export function Meets() {
         setSplitInputs(emptySplits)
       }
     } catch (error) {
-      console.error('Error loading splits:', error)
     }
   }
 
@@ -346,13 +447,11 @@ export function Meets() {
       })
       
       if (error) {
-        console.error('Error formatting time:', error)
         return formatTime(decimalTime) // Fallback to local formatting
       }
       
       return data || formatTime(decimalTime)
     } catch (error) {
-      console.error('Error calling totaltime_to_timestr:', error)
       return formatTime(decimalTime) // Fallback to local formatting
     }
   }
@@ -366,6 +465,39 @@ export function Meets() {
       }))
     )
     return formattedResults
+  }
+
+  async function formatTimesInRelayResults(relayResultsData: RelayResultWithEvent[]) {
+    if (relayResultsData.length === 0) return relayResultsData
+
+    const timesToFormat = relayResultsData
+      .filter(r => r.totalTime && r.totalTime > 0)
+      .map(r => r.totalTime!)
+
+    if (timesToFormat.length === 0) return relayResultsData
+
+    try {
+      const { data: formattedData, error } = await supabase
+        .rpc('format_times_batch', { times_array: timesToFormat })
+
+      if (error) {
+        return relayResultsData
+      }
+
+      // Create a map of time -> formatted time
+      const timeMap = new Map<number, string>()
+      formattedData?.forEach((item: { time_decimal: number, formatted_time: string }) => {
+        timeMap.set(item.time_decimal, item.formatted_time)
+      })
+
+      // Add formatted times to relay results
+      return relayResultsData.map(r => ({
+        ...r,
+        formattedTime: r.totalTime && r.totalTime > 0 ? timeMap.get(r.totalTime) : undefined
+      }))
+    } catch (error) {
+      return relayResultsData
+    }
   }
 
   async function formatTimesInSplits(splitsData: Split[]) {
@@ -451,7 +583,6 @@ export function Meets() {
       setSplitInputs([])
       
     } catch (error) {
-      console.error('Error saving splits:', error)
       alert('Error saving splits. Please try again.')
     } finally {
       setSavingSplits(false)
@@ -462,6 +593,7 @@ export function Meets() {
     setViewingResults(false)
     setEvents([])
     setResults([])
+    setRelayResults([])
     setSelectedResult(null)
     setEditingResult(null)
     setResultTimeInput('')
@@ -469,10 +601,25 @@ export function Meets() {
     setNewResultForm({ fincode: 0, timeInput: '' })
   }
 
-  function handleEditMeet(meet: Meet) {
+  async function handleEditMeet(meet: Meet) {
     setEditingMeet(meet)
     setEditForm(meet)
     setSelectedMeet(null)
+    
+    // Load existing group associations
+    try {
+      const { data, error } = await supabase
+        .from('meet_groups')
+        .select('group_id')
+        .eq('meet_id', meet.meet_id)
+      
+      if (error) throw error
+      
+      const groupIds = new Set(data?.map(mg => mg.group_id) || [])
+      setSelectedGroupIds(groupIds)
+    } catch (error) {
+      setSelectedGroupIds(new Set())
+    }
   }
 
   async function handleSaveEdit() {
@@ -494,12 +641,35 @@ export function Meets() {
 
       if (error) throw error
 
+      // Update group associations
+      // First, delete all existing associations
+      const { error: deleteError } = await supabase
+        .from('meet_groups')
+        .delete()
+        .eq('meet_id', editingMeet.meet_id)
+
+      if (deleteError) throw deleteError
+
+      // Then, insert new associations
+      if (selectedGroupIds.size > 0) {
+        const groupInserts = Array.from(selectedGroupIds).map(group_id => ({
+          meet_id: editingMeet.meet_id,
+          group_id
+        }))
+
+        const { error: insertError } = await supabase
+          .from('meet_groups')
+          .insert(groupInserts)
+
+        if (insertError) throw insertError
+      }
+
       // Refresh meets list
       await fetchMeets()
       setEditingMeet(null)
       setEditForm({})
+      setSelectedGroupIds(new Set())
     } catch (error) {
-      console.error('Error updating meet:', error)
       alert('Failed to update meet')
     }
   }
@@ -514,6 +684,7 @@ export function Meets() {
       max_date: '',
       meet_course: 1
     })
+    setSelectedGroupIds(new Set())
     setCreatingMeet(true)
   }
 
@@ -524,7 +695,8 @@ export function Meets() {
     }
 
     try {
-      const { error } = await supabase
+      // Create the meet and get the generated meet_id
+      const { data: meetData, error: meetError } = await supabase
         .from('meets')
         .insert([{
           meet_name: createForm.meet_name,
@@ -535,15 +707,31 @@ export function Meets() {
           max_date: createForm.max_date,
           meet_course: createForm.meet_course || 1
         }])
+        .select()
+        .single()
 
-      if (error) throw error
+      if (meetError) throw meetError
+
+      // Insert group associations if any groups are selected
+      if (selectedGroupIds.size > 0 && meetData) {
+        const groupInserts = Array.from(selectedGroupIds).map(group_id => ({
+          meet_id: meetData.meet_id,
+          group_id
+        }))
+
+        const { error: groupError } = await supabase
+          .from('meet_groups')
+          .insert(groupInserts)
+
+        if (groupError) throw groupError
+      }
 
       // Refresh meets list
       await fetchMeets()
       setCreatingMeet(false)
       setCreateForm({})
+      setSelectedGroupIds(new Set())
     } catch (error) {
-      console.error('Error creating meet:', error)
       alert('Failed to create meet')
     }
   }
@@ -562,23 +750,25 @@ export function Meets() {
         .eq('meet_id', meet.meet_id)
       
       if (meetGroupsError) {
-        console.error('Meet groups error:', meetGroupsError)
       }
 
       // Get group IDs from pivot table
       const meetGroupIds = meetGroupsData?.map(mg => mg.group_id) || []
       
-      // Fetch the actual group data for these IDs
-      const { data: groupsData, error: groupsError } = await supabase
-        .from('_groups')
-        .select('*')
-        .in('id', meetGroupIds)
-        .order('id', { ascending: true })
-      
-      if (groupsError) {
-        console.error('Groups error:', groupsError)
+      // Fetch the actual group data for these IDs only
+      if (meetGroupIds.length > 0) {
+        const { data: groupsData, error: groupsError } = await supabase
+          .from('_groups')
+          .select('*')
+          .in('id', meetGroupIds)
+          .order('id', { ascending: true })
+        
+        if (groupsError) {
+        } else {
+          setAvailableGroups(groupsData || [])
+        }
       } else {
-        setAvailableGroups(groupsData || [])
+        setAvailableGroups([])
       }
       
       // Fetch events with all joined data using SQL function
@@ -586,7 +776,6 @@ export function Meets() {
         .rpc('get_meet_events_with_details', { p_meet_id: meet.meet_id })
 
       if (eventsError) {
-        console.error('Events error:', eventsError)
         throw eventsError
       }
 
@@ -628,13 +817,11 @@ export function Meets() {
         .order('race_id_fin', { ascending: true })
 
       if (filteredRacesError) {
-        console.error('Filtered races error:', filteredRacesError)
       } else {
         setAvailableRaces(filteredRacesData || [])
       }
       setLoadingRaces(false)
     } catch (error) {
-      console.error('Error loading events:', error)
     } finally {
       setLoadingEvents(false)
     }
@@ -651,7 +838,6 @@ export function Meets() {
         .order('id', { ascending: true })
       
       if (groupsError) {
-        console.error('Groups error:', groupsError)
       } else {
         setAvailableGroups(groupsData || [])
       }
@@ -729,7 +915,6 @@ export function Meets() {
       setCreatingEvent(false)
       // Don't reset eventForm - keep the selections for next event
     } catch (error) {
-      console.error('Error saving event:', error)
       alert('Failed to save event')
     }
   }
@@ -752,7 +937,6 @@ export function Meets() {
         await handleViewEvents(selectedMeet)
       }
     } catch (error) {
-      console.error('Error deleting event:', error)
       alert('Failed to delete event')
     }
   }
@@ -792,7 +976,6 @@ export function Meets() {
         .eq('event_numb', event.event_numb)
 
       if (resultsError) {
-        console.error('Error fetching existing results:', resultsError)
       }
 
       // Fetch eligible athletes with personal bests using SQL function
@@ -806,7 +989,6 @@ export function Meets() {
         })
 
       if (athletesError) {
-        console.error('Error fetching eligible athletes:', athletesError)
         throw athletesError
       }
 
@@ -832,7 +1014,6 @@ export function Meets() {
         setOriginalEntries(new Set())
       }
     } catch (error) {
-      console.error('Error loading athletes for event:', error)
     } finally {
       setLoadingEventAthletes(false)
     }
@@ -918,7 +1099,6 @@ export function Meets() {
       setEventAthletes([])
       
     } catch (error) {
-      console.error('Error saving entries:', error)
       alert('Failed to save entries')
     } finally {
       setSavingEventEntries(false)
@@ -939,7 +1119,6 @@ export function Meets() {
         .eq('meet_id', meetId)
 
       if (error) {
-        console.error('Error fetching entry counts:', error)
         return
       }
 
@@ -964,7 +1143,6 @@ export function Meets() {
 
       setEventEntryCounts(counts)
     } catch (error) {
-      console.error('Error fetching entry counts:', error)
     }
   }
 
@@ -1012,7 +1190,6 @@ export function Meets() {
       setEditingResult(null)
       setResultTimeInput('')
     } catch (error) {
-      console.error('Error updating result:', error)
       alert('Failed to update result')
     }
   }
@@ -1035,7 +1212,6 @@ export function Meets() {
         prevResults.filter(r => r.res_id !== result.res_id)
       )
     } catch (error) {
-      console.error('Error deleting result:', error)
       alert('Failed to delete result')
     }
   }
@@ -1061,7 +1237,6 @@ export function Meets() {
 
       setAvailableAthletesForResult(athletesData || [])
     } catch (error) {
-      console.error('Error loading athletes:', error)
     }
   }
 
@@ -1118,7 +1293,6 @@ export function Meets() {
       setNewResultForm({ fincode: 0, timeInput: '' })
       setAvailableAthletesForResult([])
     } catch (error) {
-      console.error('Error creating result:', error)
       alert('Failed to create result')
     }
   }
@@ -1280,7 +1454,7 @@ export function Meets() {
                   </Button>
                   <div>
                     <CardTitle className="text-2xl">Results - {selectedMeet.meet_name}</CardTitle>
-                    <CardDescription>{events.length} events, {results.length} results</CardDescription>
+                    <CardDescription>{events.length} events, {results.length + relayResults.length} results</CardDescription>
                   </div>
                 </div>
                 <Button variant="ghost" onClick={closeResultsView}>✕</Button>
@@ -1289,7 +1463,7 @@ export function Meets() {
             <CardContent className="flex-1 overflow-y-auto p-6">
               {loadingResults ? (
                 <div className="text-center py-12">Loading results...</div>
-              ) : results.length === 0 ? (
+              ) : results.length === 0 && relayResults.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   No results found for this meet
                 </div>
@@ -1298,8 +1472,10 @@ export function Meets() {
                   {events
                     .sort((a, b) => a.event_numb - b.event_numb)
                     .map((event) => {
+                    const isRelayEvent = event.race && event.race.relay_count > 1
                     const eventResults = results.filter(r => r.event_numb === event.event_numb)
-                    if (eventResults.length === 0) return null
+                    const eventRelayResults = relayResults.filter(r => r.event_numb === event.event_numb)
+                    if (eventResults.length === 0 && eventRelayResults.length === 0) return null
                     
                     const race = event.race
                     const raceName = race 
@@ -1333,12 +1509,58 @@ export function Meets() {
                               Add
                             </Button>
                             <span className="text-sm text-muted-foreground">
-                              {eventResults.length} {eventResults.length === 1 ? 'result' : 'results'}
+                              {isRelayEvent ? eventRelayResults.length : eventResults.length} {(isRelayEvent ? eventRelayResults.length : eventResults.length) === 1 ? 'result' : 'results'}
                             </span>
                           </div>
                         </div>
                         <div className="space-y-1">
-                          {eventResults
+                          {isRelayEvent ? (
+                            // Relay Results Display
+                            eventRelayResults
+                              .sort((a, b) => {
+                                const aFinished = !a.result_status || a.result_status === 'FINISHED'
+                                const bFinished = !b.result_status || b.result_status === 'FINISHED'
+                                
+                                if (aFinished && !bFinished) return -1
+                                if (!aFinished && bFinished) return 1
+                                
+                                if (aFinished && bFinished) {
+                                  return (a.totalTime || 0) - (b.totalTime || 0)
+                                }
+                                
+                                return (a.result_status || '').localeCompare(b.result_status || '')
+                              })
+                              .map((relayResult, idx) => (
+                                <div
+                                  key={relayResult.relay_result_id}
+                                  className="flex items-center justify-between p-2 bg-muted/50 rounded hover:bg-muted transition-colors cursor-pointer"
+                                  onClick={() => handleViewRelaySplits(relayResult)}
+                                >
+                                  <div className="flex items-center gap-3 flex-1">
+                                    <span className="text-sm font-bold text-muted-foreground w-6">
+                                      {idx + 1}
+                                    </span>
+                                    <div>
+                                      <p className="text-sm font-medium">
+                                        {relayResult.relay_name}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground">
+                                        Relay
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-base font-bold ${relayResult.result_status !== 'FINISHED' ? 'text-destructive' : 'font-mono'}`}>
+                                      {relayResult.result_status === 'FINISHED' 
+                                        ? (relayResult.formattedTime || formatTime(relayResult.totalTime || 0))
+                                        : relayResult.result_status}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))
+                          ) : (
+                            // Individual Results Display
+                            eventResults
                             .sort((a, b) => {
                               // First, separate by status: FINISHED first, then non-FINISHED
                               const aFinished = !a.result_status || a.result_status === 'FINISHED'
@@ -1403,10 +1625,16 @@ export function Meets() {
                                 </Button>
                               </div>
                             </div>
-                          ))}
-                          {eventResults.length === 0 && (
+                          ))
+                          )}
+                          {!isRelayEvent && eventResults.length === 0 && (
                             <div className="text-center py-6 text-muted-foreground text-sm">
                               No results yet for this event
+                            </div>
+                          )}
+                          {isRelayEvent && eventRelayResults.length === 0 && (
+                            <div className="text-center py-6 text-muted-foreground text-sm">
+                              No relay results yet for this event
                             </div>
                           )}
                         </div>
@@ -1534,37 +1762,51 @@ export function Meets() {
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto space-y-3">
               <div className="space-y-2">
-                {splitInputs.map((input, idx) => (
-                  <div
-                    key={`${input.distance}-${idx}`}
-                    className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg"
-                  >
-                    <span className="text-base font-bold text-primary w-10">
-                      {input.distance}m
-                    </span>
-                    <div className="flex-1">
-                      <Input
-                        value={input.timeInput}
-                        onChange={(e) => {
-                          const newInputs = [...splitInputs]
-                          newInputs[idx].timeInput = e.target.value
-                          setSplitInputs(newInputs)
-                        }}
-                        placeholder="000000"
-                        maxLength={6}
-                        className="font-mono text-base"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Format: 6 digits (e.g., 001234 = 0:12.34)
-                      </p>
-                    </div>
-                    {input.timeInput && (
-                      <span className="text-sm font-mono text-muted-foreground min-w-[80px]">
-                        {formatTime(timeStringToMilliseconds(input.timeInput))}
+                {splitInputs.map((input, idx) => {
+                  // Find the matching split from the database
+                  const existingSplit = selectedResult.splits.find(s => s.distance === input.distance)
+                  
+                  return (
+                    <div
+                      key={`${input.distance}-${idx}`}
+                      className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg"
+                    >
+                      <span className="text-base font-bold text-primary w-10">
+                        {input.distance}m
                       </span>
-                    )}
-                  </div>
-                ))}
+                      {existingSplit ? (
+                        <span className="text-base font-mono font-medium min-w-[100px]">
+                          {existingSplit.formattedTime || formatTime(existingSplit.split_time)}
+                        </span>
+                      ) : (
+                        <span className="text-base text-muted-foreground min-w-[100px]">
+                          --:--.--
+                        </span>
+                      )}
+                      <div className="flex-1">
+                        <Input
+                          value={input.timeInput}
+                          onChange={(e) => {
+                            const newInputs = [...splitInputs]
+                            newInputs[idx].timeInput = e.target.value
+                            setSplitInputs(newInputs)
+                          }}
+                          placeholder="000000"
+                          maxLength={6}
+                          className="font-mono text-base"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Format: 6 digits (e.g., 001234 = 0:12.34)
+                        </p>
+                      </div>
+                      {input.timeInput && (
+                        <span className="text-sm font-mono text-muted-foreground min-w-[80px]">
+                          {formatTime(timeStringToMilliseconds(input.timeInput))}
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
               
               {splitInputs.length === 0 && (
@@ -1594,6 +1836,126 @@ export function Meets() {
                 </Button>
               </div>
             </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Relay Splits View Modal */}
+      {selectedRelayResult && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <CardHeader className="border-b">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-2xl">Relay Splits - {selectedRelayResult.relay_name}</CardTitle>
+                  <CardDescription>
+                    Total Time: {selectedRelayResult.formattedTime || formatTime(selectedRelayResult.totalTime || 0)}
+                  </CardDescription>
+                </div>
+                <Button variant="ghost" onClick={() => setSelectedRelayResult(null)}>✕</Button>
+              </div>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-4">
+                {/* Leg 1 */}
+                <div className="border rounded-lg p-4 bg-muted/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold">Leg 1</h3>
+                    <span className="text-lg font-mono font-bold">
+                      {formatTime(selectedRelayResult.leg1_res_time)}
+                    </span>
+                  </div>
+                  {selectedRelayResult.leg1_fincode ? (
+                    <div>
+                      <p className="text-sm font-medium">
+                        {relayAthletes.get(selectedRelayResult.leg1_fincode)?.firstname} {relayAthletes.get(selectedRelayResult.leg1_fincode)?.lastname}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        FIN: {selectedRelayResult.leg1_fincode}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Not assigned</p>
+                  )}
+                </div>
+
+                {/* Leg 2 */}
+                <div className="border rounded-lg p-4 bg-muted/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold">Leg 2</h3>
+                    <span className="text-lg font-mono font-bold">
+                      {formatTime(selectedRelayResult.leg2_res_time)}
+                    </span>
+                  </div>
+                  {selectedRelayResult.leg2_fincode ? (
+                    <div>
+                      <p className="text-sm font-medium">
+                        {relayAthletes.get(selectedRelayResult.leg2_fincode)?.firstname} {relayAthletes.get(selectedRelayResult.leg2_fincode)?.lastname}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        FIN: {selectedRelayResult.leg2_fincode}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Not assigned</p>
+                  )}
+                </div>
+
+                {/* Leg 3 */}
+                <div className="border rounded-lg p-4 bg-muted/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold">Leg 3</h3>
+                    <span className="text-lg font-mono font-bold">
+                      {formatTime(selectedRelayResult.leg3_res_time)}
+                    </span>
+                  </div>
+                  {selectedRelayResult.leg3_fincode ? (
+                    <div>
+                      <p className="text-sm font-medium">
+                        {relayAthletes.get(selectedRelayResult.leg3_fincode)?.firstname} {relayAthletes.get(selectedRelayResult.leg3_fincode)?.lastname}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        FIN: {selectedRelayResult.leg3_fincode}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Not assigned</p>
+                  )}
+                </div>
+
+                {/* Leg 4 */}
+                <div className="border rounded-lg p-4 bg-muted/20">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold">Leg 4</h3>
+                    <span className="text-lg font-mono font-bold">
+                      {formatTime(selectedRelayResult.leg4_res_time)}
+                    </span>
+                  </div>
+                  {selectedRelayResult.leg4_fincode ? (
+                    <div>
+                      <p className="text-sm font-medium">
+                        {relayAthletes.get(selectedRelayResult.leg4_fincode)?.firstname} {relayAthletes.get(selectedRelayResult.leg4_fincode)?.lastname}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        FIN: {selectedRelayResult.leg4_fincode}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Not assigned</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={() => setSelectedRelayResult(null)}
+                >
+                  Close
+                </Button>
+              </div>
+            </CardContent>
           </Card>
         </div>
       )}
@@ -1766,6 +2128,36 @@ export function Meets() {
                   />
                 </div>
               </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Participating Groups</label>
+                <div className="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
+                  {allGroups.length === 0 ? (
+                    <p className="text-sm text-gray-500">No groups available</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {allGroups.map(group => (
+                        <label key={group.id} className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedGroupIds.has(group.id)}
+                            onChange={(e) => {
+                              const newSet = new Set(selectedGroupIds)
+                              if (e.target.checked) {
+                                newSet.add(group.id)
+                              } else {
+                                newSet.delete(group.id)
+                              }
+                              setSelectedGroupIds(newSet)
+                            }}
+                            className="w-4 h-4 text-blue-600 rounded"
+                          />
+                          <span className="text-sm">{group.group_name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className="flex gap-2 pt-4">
                 <Button className="flex-1" onClick={handleCreateMeet}>Create Meet</Button>
                 <Button variant="outline" className="flex-1" onClick={() => setCreatingMeet(false)}>Cancel</Button>
@@ -1847,6 +2239,36 @@ export function Meets() {
                     value={editForm.max_date || ''}
                     onChange={(e) => setEditForm({ ...editForm, max_date: e.target.value })}
                   />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Participating Groups</label>
+                <div className="border border-gray-300 rounded-lg p-3 max-h-40 overflow-y-auto">
+                  {allGroups.length === 0 ? (
+                    <p className="text-sm text-gray-500">No groups available</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {allGroups.map(group => (
+                        <label key={group.id} className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedGroupIds.has(group.id)}
+                            onChange={(e) => {
+                              const newSet = new Set(selectedGroupIds)
+                              if (e.target.checked) {
+                                newSet.add(group.id)
+                              } else {
+                                newSet.delete(group.id)
+                              }
+                              setSelectedGroupIds(newSet)
+                            }}
+                            className="w-4 h-4 text-blue-600 rounded"
+                          />
+                          <span className="text-sm">{group.group_name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex gap-2 pt-4">
