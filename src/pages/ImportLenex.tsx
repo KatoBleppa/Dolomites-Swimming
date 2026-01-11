@@ -741,11 +741,25 @@ export function ImportLenex() {
             }
             
             try {
+              // Determine leg distance from the race info
+              const legDistance = eventMapping.dbRace?.distance || 50 // default to 50m if not found
+              
+              // Get the final result time
+              const finalTimeStr = relayResult.getAttribute('swimtime') || ''
+              const { data: finalTimeData, error: finalTimeError } = await supabase
+                .rpc('timestr_to_totaltime', { time_str: finalTimeStr })
+              
+              if (finalTimeError) {
+                throw new Error(`Failed to convert final time ${finalTimeStr}: ${finalTimeError.message}`)
+              }
+              
               // Extract splits (cumulative times at each interval)
               const splits = Array.from(relayResult.querySelectorAll('SPLIT'))
-              const splitTimes: number[] = []
               
+              // Build map of distance -> cumulative time
+              const splitMap = new Map<number, number>()
               for (const split of splits) {
+                const distance = parseInt(split.getAttribute('distance') || '0')
                 const splitTime = split.getAttribute('swimtime') || ''
                 const { data: splitTimeData, error: splitTimeError } = await supabase
                   .rpc('timestr_to_totaltime', { time_str: splitTime })
@@ -753,14 +767,22 @@ export function ImportLenex() {
                 if (splitTimeError) {
                   throw new Error(`Failed to convert split time ${splitTime}: ${splitTimeError.message}`)
                 }
-                splitTimes.push(splitTimeData)
+                splitMap.set(distance, splitTimeData)
               }
               
-              // Calculate individual leg times (difference between consecutive splits)
-              const leg1Time = splitTimes[0] || 0  // First 50m
-              const leg2Time = splitTimes.length > 1 ? splitTimes[1] - splitTimes[0] : 0  // Second 50m
-              const leg3Time = splitTimes.length > 2 ? splitTimes[2] - splitTimes[1] : 0  // Third 50m
-              const leg4Time = splitTimes.length > 3 ? splitTimes[3] - splitTimes[2] : 0  // Fourth 50m
+              // Calculate individual leg times based on leg distance
+              // For 4x50m: use splits at 50, 100, 150, 200
+              // For 4x100m: use splits at 100, 200, 300, 400
+              // For 4x200m: use splits at 200, 400, 600, 800
+              const leg1Cumulative = splitMap.get(legDistance) || 0
+              const leg2Cumulative = splitMap.get(legDistance * 2) || 0
+              const leg3Cumulative = splitMap.get(legDistance * 3) || 0
+              
+              const leg1Time = leg1Cumulative
+              const leg2Time = leg2Cumulative > 0 ? leg2Cumulative - leg1Cumulative : 0
+              const leg3Time = leg3Cumulative > 0 ? leg3Cumulative - leg2Cumulative : 0
+              // For leg 4, use the final result time minus the 3rd leg cumulative time
+              const leg4Time = finalTimeData > 0 && leg3Cumulative > 0 ? finalTimeData - leg3Cumulative : 0
               
               // Extract athlete IDs from RELAYPOSITIONS
               const relayPositions = Array.from(relayResult.querySelectorAll('RELAYPOSITION'))

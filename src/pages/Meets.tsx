@@ -104,6 +104,13 @@ export function Meets() {
   const [addingRelayEntriesForEvent, setAddingRelayEntriesForEvent] = useState<EventWithRace | null>(null)
   const [allGroups, setAllGroups] = useState<Group[]>([])
   const [selectedGroupIds, setSelectedGroupIds] = useState<Set<number>>(new Set())
+  const [editingRelayResult, setEditingRelayResult] = useState<RelayResultWithEvent | null>(null)
+  const [relayLegInputs, setRelayLegInputs] = useState<{
+    leg1: string
+    leg2: string
+    leg3: string
+    leg4: string
+  }>({ leg1: '', leg2: '', leg3: '', leg4: '' })
 
   useEffect(() => {
     if (selectedSeason) {
@@ -1216,6 +1223,117 @@ export function Meets() {
     }
   }
 
+  async function handleEditRelayResult(relayResult: RelayResultWithEvent) {
+    setEditingRelayResult(relayResult)
+    // Set initial values for leg times (don't display 000000 for zero times)
+    setRelayLegInputs({
+      leg1: relayResult.leg1_res_time === 0 ? '' : millisecondsToTimeString(relayResult.leg1_res_time),
+      leg2: relayResult.leg2_res_time === 0 ? '' : millisecondsToTimeString(relayResult.leg2_res_time),
+      leg3: relayResult.leg3_res_time === 0 ? '' : millisecondsToTimeString(relayResult.leg3_res_time),
+      leg4: relayResult.leg4_res_time === 0 ? '' : millisecondsToTimeString(relayResult.leg4_res_time)
+    })
+  }
+
+  async function handleSaveRelayResult(statusOverride?: ResultStatus) {
+    if (!editingRelayResult) return
+
+    const statusToUse = statusOverride || 'FINISHED'
+    
+    let leg1Time = 0
+    let leg2Time = 0
+    let leg3Time = 0
+    let leg4Time = 0
+
+    // If status is FINISHED, parse the times
+    if (statusToUse === 'FINISHED') {
+      leg1Time = timeStringToMilliseconds(relayLegInputs.leg1)
+      leg2Time = timeStringToMilliseconds(relayLegInputs.leg2)
+      leg3Time = timeStringToMilliseconds(relayLegInputs.leg3)
+      leg4Time = timeStringToMilliseconds(relayLegInputs.leg4)
+
+      // Validate that all times are present and valid
+      if (leg1Time === 0 && relayLegInputs.leg1 !== '000000') {
+        alert('Invalid time format for Leg 1. Please use mmsshh (e.g., 012345 for 1:23.45)')
+        return
+      }
+      if (leg2Time === 0 && relayLegInputs.leg2 !== '000000') {
+        alert('Invalid time format for Leg 2. Please use mmsshh (e.g., 012345 for 1:23.45)')
+        return
+      }
+      if (leg3Time === 0 && relayLegInputs.leg3 !== '000000') {
+        alert('Invalid time format for Leg 3. Please use mmsshh (e.g., 012345 for 1:23.45)')
+        return
+      }
+      if (leg4Time === 0 && relayLegInputs.leg4 !== '000000') {
+        alert('Invalid time format for Leg 4. Please use mmsshh (e.g., 012345 for 1:23.45)')
+        return
+      }
+    }
+
+    try {
+      const { error } = await supabase
+        .from('relay_results')
+        .update({ 
+          leg1_res_time: leg1Time,
+          leg2_res_time: leg2Time,
+          leg3_res_time: leg3Time,
+          leg4_res_time: leg4Time,
+          result_status: statusToUse
+        })
+        .eq('relay_result_id', editingRelayResult.relay_result_id)
+
+      if (error) throw error
+
+      // Update local state
+      const totalTime = leg1Time + leg2Time + leg3Time + leg4Time
+      const formattedTime = totalTime > 0 ? await formatTimeWithSupabase(totalTime) : ''
+      
+      setRelayResults(prevResults => 
+        prevResults.map(r => 
+          r.relay_result_id === editingRelayResult.relay_result_id 
+            ? { 
+                ...r, 
+                leg1_res_time: leg1Time,
+                leg2_res_time: leg2Time,
+                leg3_res_time: leg3Time,
+                leg4_res_time: leg4Time,
+                result_status: statusToUse,
+                totalTime: totalTime,
+                formattedTime: formattedTime
+              }
+            : r
+        )
+      )
+      
+      setEditingRelayResult(null)
+      setRelayLegInputs({ leg1: '', leg2: '', leg3: '', leg4: '' })
+    } catch (error) {
+      alert('Failed to update relay result')
+    }
+  }
+
+  async function handleDeleteRelayResult(relayResult: RelayResultWithEvent) {
+    if (!confirm(`Delete relay result for ${relayResult.relay_name}?`)) {
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('relay_results')
+        .delete()
+        .eq('relay_result_id', relayResult.relay_result_id)
+
+      if (error) throw error
+
+      // Update local state
+      setRelayResults(prevResults => 
+        prevResults.filter(r => r.relay_result_id !== relayResult.relay_result_id)
+      )
+    } catch (error) {
+      alert('Failed to delete relay result')
+    }
+  }
+
   async function handleAddResult(event: EventWithRace) {
     setCreatingResult(event)
     setNewResultForm({ fincode: 0, timeInput: '' })
@@ -1533,10 +1651,12 @@ export function Meets() {
                               .map((relayResult, idx) => (
                                 <div
                                   key={relayResult.relay_result_id}
-                                  className="flex items-center justify-between p-2 bg-muted/50 rounded hover:bg-muted transition-colors cursor-pointer"
-                                  onClick={() => handleViewRelaySplits(relayResult)}
+                                  className="flex items-center justify-between p-2 bg-muted/50 rounded hover:bg-muted transition-colors"
                                 >
-                                  <div className="flex items-center gap-3 flex-1">
+                                  <div 
+                                    className="flex items-center gap-3 flex-1 cursor-pointer"
+                                    onClick={() => handleViewRelaySplits(relayResult)}
+                                  >
                                     <span className="text-sm font-bold text-muted-foreground w-6">
                                       {idx + 1}
                                     </span>
@@ -1555,6 +1675,27 @@ export function Meets() {
                                         ? (relayResult.formattedTime || formatTime(relayResult.totalTime || 0))
                                         : relayResult.result_status}
                                     </span>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleEditRelayResult(relayResult)
+                                      }}
+                                    >
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="text-destructive hover:text-destructive"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleDeleteRelayResult(relayResult)
+                                      }}
+                                    >
+                                      Delete
+                                    </Button>
                                   </div>
                                 </div>
                               ))
@@ -1795,15 +1936,7 @@ export function Meets() {
                           maxLength={6}
                           className="font-mono text-base"
                         />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Format: 6 digits (e.g., 001234 = 0:12.34)
-                        </p>
                       </div>
-                      {input.timeInput && (
-                        <span className="text-sm font-mono text-muted-foreground min-w-[80px]">
-                          {formatTime(timeStringToMilliseconds(input.timeInput))}
-                        </span>
-                      )}
                     </div>
                   )
                 })}
@@ -2513,6 +2646,113 @@ export function Meets() {
                     size="sm"
                     className="flex-1" 
                     onClick={() => handleSaveResultTime('', 'DNS')}
+                  >
+                    DNS
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Edit Relay Result Modal */}
+      {editingRelayResult && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[70]">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl">Edit Relay Times</CardTitle>
+                <Button variant="ghost" onClick={() => {
+                  setEditingRelayResult(null)
+                  setRelayLegInputs({ leg1: '', leg2: '', leg3: '', leg4: '' })
+                }}>✕</Button>
+              </div>
+              <CardDescription>
+                {editingRelayResult.relay_name}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Leg 1 Time (mmsshh)</label>
+                <Input
+                  value={relayLegInputs.leg1}
+                  onChange={(e) => setRelayLegInputs({ ...relayLegInputs, leg1: e.target.value })}
+                  placeholder="012345"
+                  maxLength={6}
+                  className="font-mono text-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Leg 2 Time (mmsshh)</label>
+                <Input
+                  value={relayLegInputs.leg2}
+                  onChange={(e) => setRelayLegInputs({ ...relayLegInputs, leg2: e.target.value })}
+                  placeholder="012345"
+                  maxLength={6}
+                  className="font-mono text-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Leg 3 Time (mmsshh)</label>
+                <Input
+                  value={relayLegInputs.leg3}
+                  onChange={(e) => setRelayLegInputs({ ...relayLegInputs, leg3: e.target.value })}
+                  placeholder="012345"
+                  maxLength={6}
+                  className="font-mono text-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Leg 4 Time (mmsshh)</label>
+                <Input
+                  value={relayLegInputs.leg4}
+                  onChange={(e) => setRelayLegInputs({ ...relayLegInputs, leg4: e.target.value })}
+                  placeholder="012345"
+                  maxLength={6}
+                  className="font-mono text-lg"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Format: 6 digits (e.g., 012345 = 1:23.45) - or use status buttons below
+              </p>
+              <div className="flex flex-col gap-2 pt-4">
+                <div className="flex gap-2">
+                  <Button className="flex-1" onClick={() => handleSaveRelayResult()}>
+                    Save Times
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setEditingRelayResult(null)
+                      setRelayLegInputs({ leg1: '', leg2: '', leg3: '', leg4: '' })
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    className="flex-1" 
+                    onClick={() => handleSaveRelayResult('DSQ')}
+                  >
+                    DSQ
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    className="flex-1" 
+                    onClick={() => handleSaveRelayResult('DNF')}
+                  >
+                    DNF
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    className="flex-1" 
+                    onClick={() => handleSaveRelayResult('DNS')}
                   >
                     DNS
                   </Button>
