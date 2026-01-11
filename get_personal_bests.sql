@@ -37,7 +37,7 @@ BEGIN
   INNER JOIN meets m ON e.meet_id = m.meet_id
   INNER JOIN _races r ON e.ms_race_id = r.race_id
   WHERE m.meet_course = p_course
-    AND res.result_status = 'FINISHED'
+    AND res.status = 4
     AND r.relay_count != 1
   GROUP BY ath.fincode, ath.firstname, ath.lastname, r.race_id, r.distance, r.stroke_short_en
   ORDER BY ath.lastname, ath.firstname, r.distance, r.race_id;

@@ -52,6 +52,7 @@ export function RelayEntriesModal({ event, meet, seasonId, onClose, onSave }: Re
     { legNumber: 4, fincode: 0, athlete: null, entryTime: 0, formattedTime: '', resultTime: 0, formattedResultTime: '' }
   ])
   const [availableAthletes, setAvailableAthletes] = useState<Athlete[]>([])
+  const [personalBestsCache, setPersonalBestsCache] = useState<Map<string, number>>(new Map())
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [existingRelays, setExistingRelays] = useState<RelayResultWithAthletes[]>([])
@@ -70,32 +71,41 @@ export function RelayEntriesModal({ event, meet, seasonId, onClose, onSave }: Re
   async function fetchEligibleAthletes() {
     setLoading(true)
     try {
-      // Fetch eligible athletes for this event using the same function as individual events
-      const { data: athletesData, error } = await supabase
-        .rpc('get_eligible_athletes_for_event', {
+      // For relay events, we need to fetch all personal bests for the season/group/course
+      // because athletes need PBs for different strokes (back, breast, fly, free)
+      const { data: pbData, error: pbError } = await supabase
+        .rpc('get_personal_bests', {
           p_season_id: seasonId,
-          p_event_gender: event.gender,
-          p_event_group_id: event.ms_group_id,
-          p_race_id: event.ms_race_id,
-          p_meet_course: meet.meet_course
+          p_group_id: event.ms_group_id,
+          p_course: meet.meet_course
         })
 
-      if (error) throw error
+      if (pbError) throw pbError
 
-      // Map to Athlete type
-      const athletes: Athlete[] = (athletesData || []).map((a: any) => ({
-        fincode: a.fincode,
-        firstname: a.firstname,
-        lastname: a.lastname,
-        birthdate: a.birthdate,
-        gender: a.gender,
-        email: a.email || '',
-        phone: a.phone || '',
-        created_at: a.created_at || '',
-        updated_at: a.updated_at || ''
-      }))
+      // Build personal bests cache for each athlete-race combination
+      const pbCache = new Map<string, number>()
+      const athleteSet = new Set<number>()
+      
+      // For each personal best record, store it and track unique athletes
+      for (const pb of pbData || []) {
+        const key = `${pb.fincode}-${pb.race_id}`
+        pbCache.set(key, pb.best_time_decimal)
+        athleteSet.add(pb.fincode)
+      }
+      
+      console.log('Personal bests cache built:', pbCache.size, 'entries for', athleteSet.size, 'athletes')
+      setPersonalBestsCache(pbCache)
 
-      setAvailableAthletes(athletes)
+      // Fetch full athlete details for all athletes with PBs
+      const { data: athletesData, error: athletesError } = await supabase
+        .from('athletes')
+        .select('*')
+        .in('fincode', Array.from(athleteSet))
+        .eq('gender', event.gender)
+
+      if (athletesError) throw athletesError
+
+      setAvailableAthletes(athletesData || [])
     } catch (error) {
       console.error('Error fetching eligible athletes:', error)
       alert('Failed to load eligible athletes')
@@ -168,10 +178,12 @@ export function RelayEntriesModal({ event, meet, seasonId, onClose, onSave }: Re
       return
     }
 
-    // Fetch personal best for this athlete based on the stroke for this leg
-    const personalBest = await fetchPersonalBestForLeg(fincodeNum, legNumber)
+    // Get personal best for this athlete based on the stroke for this leg
+    const raceId = getRaceIdForLeg(legNumber)
+    const pbKey = `${fincodeNum}-${raceId}`
+    const personalBest = personalBestsCache.get(pbKey) || 0
     
-    console.log('Personal best fetched:', { fincodeNum, legNumber, personalBest })
+    console.log('Personal best from cache:', { fincodeNum, legNumber, raceId, personalBest })
     
     // Update this leg
     setLegs(prev => prev.map(leg => 
@@ -234,41 +246,6 @@ export function RelayEntriesModal({ event, meet, seasonId, onClose, onSave }: Re
     }
     
     return null
-  }
-
-  async function fetchPersonalBestForLeg(fincode: number, legNumber: 1 | 2 | 3 | 4): Promise<number> {
-    try {
-      if (!event.race) return 0
-      
-      const raceId = getRaceIdForLeg(legNumber)
-      if (!raceId) return 0
-      
-      // Determine course: 1 for 50m, 2 for 25m
-      const course = meet.meet_course === 50 ? 1 : 2
-      
-      // Call the get_personal_bests function
-      // Explicitly cast to integer to avoid overload ambiguity
-      const { data, error } = await supabase
-        .rpc('get_personal_best', {
-          p_fincode: Number(fincode),
-          p_ms_race_id: Number(raceId),
-          p_course: Number(course)
-        })
-      
-      if (error) {
-        console.error('Error fetching personal best:', error)
-        throw error
-      }
-      
-      console.log('Personal best data:', { fincode, legNumber, raceId, course, data })
-      
-      // The function returns an array with an object containing res_time_decimal property
-      const pbTime = data?.[0]?.res_time_decimal || 0
-      return pbTime
-    } catch (error) {
-      console.error('Error fetching personal best for leg:', error)
-      return 0
-    }
   }
 
   function millisecondsToTimeString(ms: number): string {

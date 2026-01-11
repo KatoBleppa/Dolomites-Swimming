@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -66,6 +66,7 @@ export function Meets() {
   const [events, setEvents] = useState<EventWithRace[]>([])
   const [results, setResults] = useState<ResultWithAthlete[]>([])
   const [relayResults, setRelayResults] = useState<RelayResultWithEvent[]>([])
+  const [meetStats, setMeetStats] = useState<{ eventsCount: number; entriesCount: number; resultsCount: number }>({ eventsCount: 0, entriesCount: 0, resultsCount: 0 })
   const [selectedResult, setSelectedResult] = useState<SplitData | null>(null)
   const [selectedRelayResult, setSelectedRelayResult] = useState<RelayResultWithEvent | null>(null)
   const [relayAthletes, setRelayAthletes] = useState<Map<number, Athlete>>(new Map())
@@ -101,6 +102,8 @@ export function Meets() {
   const [availableAthletesForResult, setAvailableAthletesForResult] = useState<Athlete[]>([])
   const [splitInputs, setSplitInputs] = useState<{ distance: number; timeInput: string; splits_id?: number }[]>([])
   const [savingSplits, setSavingSplits] = useState(false)
+  const [editingSplits, setEditingSplits] = useState(false)
+  const inputRefs = useRef<Map<number, HTMLInputElement>>(new Map())
   const [addingRelayEntriesForEvent, setAddingRelayEntriesForEvent] = useState<EventWithRace | null>(null)
   const [allGroups, setAllGroups] = useState<Group[]>([])
   const [selectedGroupIds, setSelectedGroupIds] = useState<Set<number>>(new Set())
@@ -184,8 +187,65 @@ export function Meets() {
     meet.place.toLowerCase().includes(searchTerm.toLowerCase()) ||
     meet.nation.toLowerCase().includes(searchTerm.toLowerCase())
   )
+  
+  // Fetch meet statistics when a meet is selected
+  async function fetchMeetStats(meet: Meet) {
+    try {
+      // Count events using the RPC function
+      const { data: eventsData, error: eventsError } = await supabase
+        .rpc('get_meet_events_with_details', { p_meet_id: meet.meet_id })
+      
+      if (eventsError) {
+        console.error('Error fetching events:', eventsError)
+      }
+      
+      const eventsCount = eventsData?.length || 0
+      
+      // Count entries: results with status=0 (entered, not yet finished)
+      const { count: entriesCount } = await supabase
+        .from('results')
+        .select('*', { count: 'exact', head: true })
+        .eq('meet_id', meet.meet_id)
+        .eq('status', 0)
+      
+      const { count: relayEntriesCount } = await supabase
+        .from('relay_results')
+        .select('*', { count: 'exact', head: true })
+        .eq('meet_id', meet.meet_id)
+        .eq('status', 0)
+      
+      const totalEntriesCount = (entriesCount || 0) + (relayEntriesCount || 0)
+      
+      // Count results: results with status 1-4 (DSQ, DNF, DNS, FINISHED)
+      const { count: resultsCount } = await supabase
+        .from('results')
+        .select('*', { count: 'exact', head: true })
+        .eq('meet_id', meet.meet_id)
+        .not('status', 'is', null)
+        .neq('status', 0)
+      
+      const { count: relayResultsCount } = await supabase
+        .from('relay_results')
+        .select('*', { count: 'exact', head: true })
+        .eq('meet_id', meet.meet_id)
+        .not('status', 'is', null)
+        .neq('status', 0)
+      
+      const totalResultsCount = (resultsCount || 0) + (relayResultsCount || 0)
+      
+      setMeetStats({
+        eventsCount: eventsCount || 0,
+        entriesCount: totalEntriesCount,
+        resultsCount: totalResultsCount
+      })
+    } catch (error) {
+      console.error('Error fetching meet stats:', error)
+      setMeetStats({ eventsCount: 0, entriesCount: 0, resultsCount: 0 })
+    }
+  }
 
   async function handleViewResults(meet: Meet) {
+    setSelectedMeet(meet)
     setViewingResults(true)
     setLoadingResults(true)
     
@@ -197,6 +257,9 @@ export function Meets() {
       if (eventsError) {
         throw eventsError
       }
+      
+      // Count events
+      const eventsCount = eventsData?.length || 0
 
       // Transform data to match EventWithRace interface
       const eventsWithRaces: EventWithRace[] = (eventsData || []).map((e: any) => ({
@@ -223,6 +286,19 @@ export function Meets() {
       }))
 
       setEvents(eventsWithRaces)
+      
+      // Fetch entries count for this meet (both individual and relay)
+      const { count: entriesCount } = await supabase
+        .from('entries')
+        .select('*', { count: 'exact', head: true })
+        .eq('meet_id', meet.meet_id)
+      
+      const { count: relayEntriesCount } = await supabase
+        .from('relay_entries')
+        .select('*', { count: 'exact', head: true })
+        .eq('meet_id', meet.meet_id)
+      
+      const totalEntriesCount = (entriesCount || 0) + (relayEntriesCount || 0)
 
       // Fetch results for this meet
       const { data: resultsData, error: resultsError } = await supabase
@@ -302,6 +378,14 @@ export function Meets() {
         const relayResultsWithFormattedTimes = await formatTimesInRelayResults(transformedRelayResults)
         setRelayResults(relayResultsWithFormattedTimes)
       }
+      
+      // Update meet statistics
+      const totalResultsCount = (resultsData?.length || 0) + (relayResultsData?.length || 0)
+      setMeetStats({
+        eventsCount,
+        entriesCount: totalEntriesCount,
+        resultsCount: totalResultsCount
+      })
     } catch (error) {
     } finally {
       setLoadingResults(false)
@@ -359,25 +443,28 @@ export function Meets() {
         result,
         splits: splitsWithFormattedTimes
       })
+      
+      // Reset edit mode to default read view
+      setEditingSplits(false)
 
       // Initialize split inputs
       if (splitsData && splitsData.length > 0) {
-        // Use existing splits and convert to mmsshh format
+        // Use existing splits and store formatted time
         const inputs = splitsData.map(split => ({
           distance: split.distance,
-          timeInput: millisecondsToTimeString(split.split_time),
+          timeInput: formatTime(split.split_time),
           splits_id: split.splits_id
         }))
         
         // Always ensure the last input (final distance) has the result time
         const finalSplit = inputs.find(input => input.distance === distance)
         if (finalSplit) {
-          finalSplit.timeInput = millisecondsToTimeString(result.res_time_decimal)
+          finalSplit.timeInput = formatTime(result.res_time_decimal)
         } else if (distance > 0) {
           // Add final distance split if it doesn't exist
             inputs.push({
               distance: distance,
-              timeInput: millisecondsToTimeString(result.res_time_decimal),
+              timeInput: formatTime(result.res_time_decimal),
               splits_id: undefined
             })
         }
@@ -389,7 +476,7 @@ export function Meets() {
         
         // Set the last split to the final result time
         if (emptySplits.length > 0 && distance > 0) {
-          emptySplits[emptySplits.length - 1].timeInput = millisecondsToTimeString(result.res_time_decimal)
+          emptySplits[emptySplits.length - 1].timeInput = formatTime(result.res_time_decimal)
         }
         
         setSplitInputs(emptySplits)
@@ -445,6 +532,12 @@ export function Meets() {
     const centiseconds = Math.round((totalSeconds - Math.floor(totalSeconds)) * 100)
     
     return `${minutes.toString().padStart(2, '0')}:${secondsWhole.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`
+  }
+
+  // Convert formatted time with possible underscores to mm:ss.cc
+  function formattedTimeToDisplay(timeStr: string): string {
+    // Replace underscores with zeros for display
+    return timeStr.replace(/_/g, '0')
   }
 
   async function formatTimeWithSupabase(decimalTime: number): Promise<string> {
@@ -523,15 +616,31 @@ export function Meets() {
     try {
       setSavingSplits(true)
 
-      // Filter out empty inputs and convert times
+      // Filter out inputs with underscores (incomplete times) and convert to milliseconds
       const splitsToSave = splitInputs
-        .filter(input => input.timeInput.trim() !== '')
-        .map(input => ({
-          splits_res_id: selectedResult.result.res_id,
-          distance: input.distance,
-          split_time: timeStringToMilliseconds(input.timeInput),
-          splits_id: input.splits_id
-        }))
+        .filter(input => {
+          const hasUnderscore = input.timeInput.includes('_')
+          const isEmpty = input.timeInput.trim() === '' || input.timeInput === '__:__.__'
+          return !hasUnderscore && !isEmpty
+        })
+        .map(input => {
+          // Convert formatted time (mm:ss.cc) to milliseconds
+          const timeParts = input.timeInput.match(/(\d{2}):(\d{2})\.(\d{2})/)
+          if (!timeParts) {
+            throw new Error(`Invalid time format: ${input.timeInput}`)
+          }
+          const minutes = parseInt(timeParts[1], 10)
+          const seconds = parseInt(timeParts[2], 10)
+          const centiseconds = parseInt(timeParts[3], 10)
+          const milliseconds = (minutes * 60 * 1000) + (seconds * 1000) + (centiseconds * 10)
+          
+          return {
+            splits_res_id: selectedResult.result.res_id,
+            distance: input.distance,
+            split_time: milliseconds,
+            splits_id: input.splits_id
+          }
+        })
 
       // Get existing split IDs
       const existingSplitIds = splitInputs
@@ -585,9 +694,10 @@ export function Meets() {
         }
       }
 
-      // Close splits modal - no need to refresh results view
+      // Close splits modal and exit edit mode
       setSelectedResult(null)
       setSplitInputs([])
+      setEditingSplits(false)
       
     } catch (error) {
       alert('Error saving splits. Please try again.')
@@ -1463,7 +1573,10 @@ export function Meets() {
             <div 
               key={meet.meet_id}
               className="cursor-pointer"
-              onClick={() => setSelectedMeet(meet)}
+              onClick={() => {
+                setSelectedMeet(meet)
+                fetchMeetStats(meet)
+              }}
             >
               <Card className="hover:shadow-md transition-shadow h-full">
                 <CardHeader>
@@ -1523,6 +1636,18 @@ export function Meets() {
                     {new Date(selectedMeet.min_date).toLocaleDateString()} - {new Date(selectedMeet.max_date).toLocaleDateString()}
                   </p>
                 </div>
+                <div>
+                  <p className="text-sm font-medium">Events</p>
+                  <p className="text-sm text-muted-foreground">{meetStats.eventsCount}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Entries</p>
+                  <p className="text-sm text-muted-foreground">{meetStats.entriesCount}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Results</p>
+                  <p className="text-sm text-muted-foreground">{meetStats.resultsCount}</p>
+                </div>
               </div>
               <div className="flex gap-2 pt-4">
                 <Button 
@@ -1572,7 +1697,9 @@ export function Meets() {
                   </Button>
                   <div>
                     <CardTitle className="text-2xl">Results - {selectedMeet.meet_name}</CardTitle>
-                    <CardDescription>{events.length} events, {results.length + relayResults.length} results</CardDescription>
+                    <CardDescription>
+                      Events: {meetStats.eventsCount} • Entries: {meetStats.entriesCount} • Results: {meetStats.resultsCount}
+                    </CardDescription>
                   </div>
                 </div>
                 <Button variant="ghost" onClick={closeResultsView}>✕</Button>
@@ -1898,6 +2025,7 @@ export function Meets() {
                 <Button variant="ghost" onClick={() => {
                   setSelectedResult(null)
                   setSplitInputs([])
+                  setEditingSplits(false)
                 }}>✕</Button>
               </div>
             </CardHeader>
@@ -1912,31 +2040,144 @@ export function Meets() {
                       key={`${input.distance}-${idx}`}
                       className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg"
                     >
-                      <span className="text-base font-bold text-primary w-10">
+                      <span className="text-base font-bold text-primary w-16">
                         {input.distance}m
                       </span>
-                      {existingSplit ? (
-                        <span className="text-base font-mono font-medium min-w-[100px]">
-                          {existingSplit.formattedTime || formatTime(existingSplit.split_time)}
-                        </span>
+                      
+                      {editingSplits ? (
+                        <div className="flex-1">
+                          <Input
+                            ref={(el) => {
+                              if (el) inputRefs.current.set(idx, el)
+                            }}
+                            value={input.timeInput}
+                            onChange={(e) => {
+                              // Prevent onChange from doing anything - we handle everything in onKeyDown
+                              e.preventDefault()
+                            }}
+                            onKeyDown={(e) => {
+                              const inputEl = inputRefs.current.get(idx)
+                              if (!inputEl) return
+                              
+                              const cursorPos = inputEl.selectionStart || 0
+                              
+                              if (e.key === 'Backspace') {
+                                e.preventDefault()
+                                
+                                // Convert current display to array
+                                const chars = input.timeInput.split('')
+                                
+                                // Find the digit position to the left of cursor
+                                let targetPos = cursorPos - 1
+                                
+                                // Skip : and . when going backwards
+                                while (targetPos >= 0 && (chars[targetPos] === ':' || chars[targetPos] === '.')) {
+                                  targetPos--
+                                }
+                                
+                                // Replace digit with underscore
+                                if (targetPos >= 0 && (chars[targetPos] === '_' || /[0-9]/.test(chars[targetPos]))) {
+                                  chars[targetPos] = '_'
+                                  const newFormatted = chars.join('')
+                                  
+                                  const newInputs = [...splitInputs]
+                                  newInputs[idx].timeInput = newFormatted
+                                  setSplitInputs(newInputs)
+                                  
+                                  // Move cursor to the left of the deleted digit
+                                  setTimeout(() => {
+                                    inputEl.setSelectionRange(targetPos, targetPos)
+                                  }, 0)
+                                }
+                                return
+                              }
+                              
+                              if (e.key === 'Delete') {
+                                e.preventDefault()
+                                
+                                // Convert current display to array
+                                const chars = input.timeInput.split('')
+                                
+                                // Find the digit position at cursor
+                                let targetPos = cursorPos
+                                
+                                // Skip : and . when going forward
+                                while (targetPos < chars.length && (chars[targetPos] === ':' || chars[targetPos] === '.')) {
+                                  targetPos++
+                                }
+                                
+                                // Replace digit with underscore
+                                if (targetPos < chars.length && (chars[targetPos] === '_' || /[0-9]/.test(chars[targetPos]))) {
+                                  chars[targetPos] = '_'
+                                  const newFormatted = chars.join('')
+                                  
+                                  const newInputs = [...splitInputs]
+                                  newInputs[idx].timeInput = newFormatted
+                                  setSplitInputs(newInputs)
+                                  
+                                  // Keep cursor at same position
+                                  setTimeout(() => {
+                                    inputEl.setSelectionRange(cursorPos, cursorPos)
+                                  }, 0)
+                                }
+                                return
+                              }
+                              
+                              // Handle digit input
+                              if (/^[0-9]$/.test(e.key)) {
+                                e.preventDefault()
+                                
+                                // Convert current display to array
+                                const chars = input.timeInput.split('')
+                                
+                                // Find the digit position at cursor
+                                let targetPos = cursorPos
+                                
+                                // Skip : and . when at those positions
+                                while (targetPos < chars.length && (chars[targetPos] === ':' || chars[targetPos] === '.')) {
+                                  targetPos++
+                                }
+                                
+                                // Replace digit or underscore at this position
+                                if (targetPos < chars.length) {
+                                  chars[targetPos] = e.key
+                                  const newFormatted = chars.join('')
+                                  
+                                  const newInputs = [...splitInputs]
+                                  newInputs[idx].timeInput = newFormatted
+                                  setSplitInputs(newInputs)
+                                  
+                                  // Move cursor forward past the inserted digit and any separators
+                                  setTimeout(() => {
+                                    let newCursorPos = targetPos + 1
+                                    // Skip over : or . if we land on them
+                                    while (newCursorPos < 8 && (newFormatted[newCursorPos] === ':' || newFormatted[newCursorPos] === '.')) {
+                                      newCursorPos++
+                                    }
+                                    inputEl.setSelectionRange(newCursorPos, newCursorPos)
+                                  }, 0)
+                                }
+                                return
+                              }
+                              
+                              // Allow arrow keys and tab
+                              if (['ArrowLeft', 'ArrowRight', 'Tab', 'Home', 'End'].includes(e.key)) {
+                                return
+                              }
+                              
+                              // Block all other keys
+                              e.preventDefault()
+                            }}
+                            placeholder="__:__.__"
+                            className="font-mono text-base"
+                            maxLength={8}
+                          />
+                        </div>
                       ) : (
-                        <span className="text-base text-muted-foreground min-w-[100px]">
-                          --:--.--
+                        <span className="text-base font-mono font-medium flex-1">
+                          {existingSplit?.formattedTime || input.timeInput !== '__:__.__' ? formattedTimeToDisplay(input.timeInput) : '--:--.--'}
                         </span>
                       )}
-                      <div className="flex-1">
-                        <Input
-                          value={input.timeInput}
-                          onChange={(e) => {
-                            const newInputs = [...splitInputs]
-                            newInputs[idx].timeInput = e.target.value
-                            setSplitInputs(newInputs)
-                          }}
-                          placeholder="000000"
-                          maxLength={6}
-                          className="font-mono text-base"
-                        />
-                      </div>
                     </div>
                   )
                 })}
@@ -1950,23 +2191,49 @@ export function Meets() {
             </CardContent>
             <div className="border-t p-4">
               <div className="flex gap-2">
-                <Button 
-                  className="flex-1" 
-                  onClick={handleSaveSplits}
-                  disabled={savingSplits || splitInputs.length === 0}
-                >
-                  {savingSplits ? 'Saving...' : 'Save Splits'}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="flex-1" 
-                  onClick={() => {
-                    setSelectedResult(null)
-                    setSplitInputs([])
-                  }}
-                >
-                  Cancel
-                </Button>
+                {!editingSplits ? (
+                  <>
+                    <Button 
+                      className="flex-1" 
+                      onClick={() => setEditingSplits(true)}
+                      disabled={splitInputs.length === 0}
+                    >
+                      Edit Splits
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="flex-1" 
+                      onClick={() => {
+                        setSelectedResult(null)
+                        setSplitInputs([])
+                        setEditingSplits(false)
+                      }}
+                    >
+                      Close
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      className="flex-1" 
+                      onClick={handleSaveSplits}
+                      disabled={savingSplits || splitInputs.length === 0}
+                    >
+                      {savingSplits ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="flex-1" 
+                      onClick={() => {
+                        setEditingSplits(false)
+                        // Reload the splits to reset any unsaved changes
+                        handleViewSplits(selectedResult.result)
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </Card>
