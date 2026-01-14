@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Calculator, Clock, Award, BarChart3, Hash, TrendingUp, Upload } from 'lucide-react'
+import { Calculator, Clock, Award, BarChart3, Hash, TrendingUp, Upload, LineChart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const tools = [
@@ -67,6 +67,13 @@ const tools = [
     action: 'Import File',
     path: '/import-lenex',
   },
+  {
+    title: 'Progress Tracking',
+    description: 'Track swimmer progress individually and as a group',
+    icon: LineChart,
+    action: 'View Progress',
+    path: '/progress',
+  },
 ]
 
 export function Tools() {
@@ -125,7 +132,6 @@ export function Tools() {
             <li>Workout generator</li>
             <li>Season planning tool</li>
             <li>Team management dashboard</li>
-            <li>Progress tracking charts</li>
           </ul>
         </CardContent>
       </Card>
