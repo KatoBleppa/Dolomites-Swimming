@@ -119,6 +119,8 @@ export interface Result {
   meet_id: number
   event_numb: number
   res_time_decimal: number
+  entry_time_decimal?: number
+  entry_time_res_id?: number
   result_status: ResultStatus
   created_at: string
   updated_at: string

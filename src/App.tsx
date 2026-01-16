@@ -13,6 +13,7 @@ import { DatabaseTest } from './pages/DatabaseTest'
 import { PB } from './pages/PB'
 import { ImportLenex } from './pages/ImportLenex'
 import { Progress } from './pages/Progress'
+import { EntrySheet } from './pages/EntrySheet'
 import { SeasonProvider } from './contexts/SeasonContext'
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
             <Route path="/pb" element={<PB />} />
             <Route path="/import-lenex" element={<ImportLenex />} />
             <Route path="/progress" element={<Progress />} />
+            <Route path="/entry-sheet" element={<EntrySheet />} />
             <Route path="/test" element={<DatabaseTest />} />
           </Routes>
         </DashboardLayout>

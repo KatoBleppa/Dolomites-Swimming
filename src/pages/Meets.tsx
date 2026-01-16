@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -58,6 +59,7 @@ interface SplitData {
 
 export function Meets() {
   const { selectedSeason } = useSeason()
+  const navigate = useNavigate()
   const [meets, setMeets] = useState<Meet[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -86,7 +88,7 @@ export function Meets() {
   const [loadingRaces, setLoadingRaces] = useState(false)
   const [raceTypeFilter, setRaceTypeFilter] = useState<'IND' | 'REL'>('IND')
   const [addingEntriesForEvent, setAddingEntriesForEvent] = useState<EventWithRace | null>(null)
-  const [eventAthletes, setEventAthletes] = useState<(Athlete & { group_id?: number, personalBest?: number, formattedPersonalBest?: string })[]>([])
+  const [eventAthletes, setEventAthletes] = useState<(Athlete & { group_id?: number, personalBest?: number, formattedPersonalBest?: string, personalBestResId?: number })[]>([])
   const [selectedAthletes, setSelectedAthletes] = useState<Set<number>>(new Set())
   const [originalEntries, setOriginalEntries] = useState<Set<number>>(new Set())
   const [loadingEventAthletes, setLoadingEventAthletes] = useState(false)
@@ -1106,8 +1108,18 @@ export function Meets() {
         })
 
       if (athletesError) {
+        console.error('Error fetching athletes:', athletesError)
+        console.error('Parameters:', {
+          p_season_id: selectedSeason.season_id,
+          p_event_gender: event.gender,
+          p_event_group_id: event.ms_group_id,
+          p_race_id: event.ms_race_id,
+          p_meet_course: selectedMeet.meet_course
+        })
         throw athletesError
       }
+
+      console.log('Athletes returned:', athletesData?.length || 0)
 
       // Map to the expected format
       const athletesWithPB = (athletesData || []).map((athlete: any) => ({
@@ -1117,7 +1129,8 @@ export function Meets() {
         gender: athlete.gender,
         group_id: athlete.group_id,
         personalBest: athlete.personal_best,
-        formattedPersonalBest: athlete.pb_string
+        formattedPersonalBest: athlete.pb_string,
+        personalBestResId: athlete.pb_res_id
       }))
 
       setEventAthletes(athletesWithPB)
@@ -1183,7 +1196,8 @@ export function Meets() {
             meet_id: selectedMeet.meet_id,
             event_numb: addingEntriesForEvent.event_numb,
             res_time_decimal: 0,
-            entry_time_decimal: athlete?.personalBest || 0
+            entry_time_decimal: athlete?.personalBest || 0,
+            entry_time_res_id: athlete?.personalBestResId || null
           }
         })
 
@@ -1655,6 +1669,17 @@ export function Meets() {
                   onClick={() => handleEditMeet(selectedMeet)}
                 >
                   Edit
+                </Button>
+                <Button 
+                  size="sm"
+                  variant="outline"
+                  className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    navigate(`/entry-sheet?meet_id=${selectedMeet.meet_id}`)
+                  }}
+                >
+                  Entry Sheet
                 </Button>
                 <Button 
                   size="sm"

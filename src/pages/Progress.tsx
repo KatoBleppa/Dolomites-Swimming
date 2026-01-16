@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { supabase } from '@/lib/supabase'
-import { TrendingUp, TrendingDown, Award, Users } from 'lucide-react'
+import { Users } from 'lucide-react'
 import { useSeason } from '@/contexts/SeasonContext'
 import {
   LineChart,
@@ -22,6 +22,11 @@ interface Athlete {
   fincode: number
   firstname: string
   lastname: string
+}
+
+interface Group {
+  id: number
+  group_name: string
 }
 
 interface ProgressData {
@@ -49,46 +54,76 @@ interface GroupStats {
 export function Progress() {
   const { selectedSeason } = useSeason()
   const [loading, setLoading] = useState(false)
+  const [groups, setGroups] = useState<Group[]>([])
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
   const [athletes, setAthletes] = useState<Athlete[]>([])
   const [selectedAthlete, setSelectedAthlete] = useState<number | null>(null)
   const [selectedRace, setSelectedRace] = useState<number | null>(null)
   const [progressData, setProgressData] = useState<ProgressData[]>([])
   const [groupStats, setGroupStats] = useState<GroupStats[]>([])
   const [races, setRaces] = useState<{ race_id: number; race_name: string }[]>([])
+  const [selectedCourse, setSelectedCourse] = useState<number>(2)
   const [viewMode, setViewMode] = useState<'individual' | 'group'>('individual')
 
   useEffect(() => {
     if (selectedSeason) {
-      fetchAthletes()
+      fetchGroups()
       fetchRaces()
       fetchGroupStats()
     }
   }, [selectedSeason])
 
   useEffect(() => {
+    if (selectedSeason && selectedGroup) {
+      fetchAthletes()
+      setSelectedAthlete(null) // Clear athlete selection when group changes
+    }
+  }, [selectedSeason, selectedGroup])
+
+  useEffect(() => {
     if (selectedSeason && selectedAthlete && selectedRace) {
       fetchProgressData()
     }
-  }, [selectedSeason, selectedAthlete, selectedRace])
+  }, [selectedSeason, selectedAthlete, selectedRace, selectedCourse])
 
-  async function fetchAthletes() {
-    if (!selectedSeason) return
+ 
 
+  async function fetchGroups() {
     try {
       const { data, error } = await supabase
-        .from('roster')
-        .select(`
-          fincode,
-          athletes (firstname, lastname)
-        `)
-        .eq('season_id', selectedSeason.season_id)
+        .from('_groups')
+        .select('id, group_name')
+        .order('group_name')
+
+      if (error) throw error
+
+      setGroups(data || [])
+    } catch (error) {
+      console.error('Error fetching groups:', error)
+    }
+  }
+
+  async function fetchAthletes() {
+    if (!selectedSeason || !selectedGroup) return
+
+    try {
+      // Get the group_id from the selected group
+      const selectedGroupObj = groups.find(g => g.group_name === selectedGroup)
+      if (!selectedGroupObj) return
+
+      // Use get_athletes_details function
+      const { data, error } = await supabase
+        .rpc('get_athletes_details', {
+          p_season_id: selectedSeason.season_id,
+          p_group_id: selectedGroupObj.id
+        })
 
       if (error) throw error
 
       const athleteList = data?.map((item: any) => ({
         fincode: item.fincode,
-        firstname: item.athletes.firstname,
-        lastname: item.athletes.lastname,
+        lastname: item.lastname,
+        firstname: item.firstname,
       })) || []
 
       setAthletes(athleteList)
@@ -132,7 +167,7 @@ export function Progress() {
 
       if (!raceData) return
 
-      // Fetch progress data using the new SQL function
+      // Fetch progress data using the SQL function
       const { data: results, error } = await supabase
         .rpc('progress_data', {
           athlete_fincode: selectedAthlete,
@@ -141,27 +176,41 @@ export function Progress() {
 
       if (error) throw error
 
+      // Filter results by course if needed
+      let filteredResults = results || []
+      if (filteredResults.length > 0) {
+        const meetIds = Array.from(new Set(filteredResults.map((r: any) => r.meet_id)))
+        const { data: meetsData, error: meetsError } = await supabase
+          .from('meets')
+          .select('meet_id, meet_course')
+          .in('meet_id', meetIds)
+
+        if (meetsError) throw meetsError
+
+        const meetCourseMap: Map<number, number> = new Map();
+        (meetsData || []).forEach((m: any) => meetCourseMap.set(m.meet_id, m.meet_course));
+
+        filteredResults = filteredResults.filter((r: any) => meetCourseMap.get(r.meet_id) === selectedCourse);
+      }
+
       // Get athlete info
       const athlete = athletes.find(a => a.fincode === selectedAthlete)
       if (!athlete) return
 
-      // Process results to calculate improvement
+      // Process filtered results to calculate improvement
       const processedData: ProgressData[] = []
       let bestTime = Infinity
 
-      results?.forEach((result: any) => {
+      filteredResults.forEach((result: any) => {
         const time = result.res_time_decimal
 
         if (time < bestTime) {
           bestTime = time
         }
 
-        const improvement = processedData.length > 0 
+        const improvement = processedData.length > 0
           ? processedData[processedData.length - 1].res_time_decimal - time
           : 0
-
-        const meetDate = result.meets?.min_date ?? ''
-        const meetName = result.meets?.meet_name ?? ''
 
         processedData.push({
           fincode: result.fincode,
@@ -170,10 +219,10 @@ export function Progress() {
           race_id: selectedRace,
           distance: raceData.distance,
           stroke_short_en: raceData.stroke_short_en,
-          meet_date: meetDate,
-          meet_name: meetName,
+          meet_date: result.min_date ?? '',
+          meet_name: result.meet_name ?? '',
           res_time_decimal: time,
-          time_str: formatTime(time),
+          time_str: result.time_str ?? formatTime(time),
           improvement: improvement,
           best_time: bestTime,
         })
@@ -261,156 +310,166 @@ export function Progress() {
   }
 
   function formatTime(decimal: number): string {
-    const totalSeconds = decimal / 100
+    const totalSeconds = decimal / 1000
     const minutes = Math.floor(totalSeconds / 60)
     const seconds = (totalSeconds % 60).toFixed(2)
     return minutes > 0 ? `${minutes}:${seconds.padStart(5, '0')}` : seconds
   }
 
+  function formatDelta(milliseconds: number): string {
+    const sign = milliseconds > 0 ? '-' : '+'
+    const abs = Math.abs(milliseconds)
+    const totalSeconds = abs / 1000
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = (totalSeconds % 60).toFixed(2)
+    const timeStr = minutes > 0 ? `${minutes}:${seconds.padStart(5, '0')}` : seconds
+    return `${sign}${timeStr}s`
+  }
+
   // Calculate statistics
-  const totalRaces = progressData.length
-  const bestTime = progressData.length > 0 ? Math.min(...progressData.map(d => d.res_time_decimal)) : 0
-  const avgTime = progressData.length > 0 
-    ? progressData.reduce((sum, d) => sum + d.res_time_decimal, 0) / progressData.length 
-    : 0
-  const totalImprovement = progressData.length > 1 
-    ? progressData[0].res_time_decimal - progressData[progressData.length - 1].res_time_decimal 
-    : 0
+  // Dynamic Y-axis domain to emphasize variation in times
+  const yDomain: number[] | undefined = (() => {
+    if (!progressData || progressData.length === 0) return undefined
+    const values = progressData.map(d => d.res_time_decimal)
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const range = max - min
+    const pad = Math.max(100, Math.floor(range * 0.2))
+    return [Math.max(0, min - pad), max + pad]
+  })()
+
+  // Y-axis domain for improvement chart (improvements are in ms and often small)
+  const yDomainImprovement: number[] | undefined = (() => {
+    const impData = progressData && progressData.length > 1 ? progressData.slice(1).map(d => d.improvement) : []
+    if (!impData || impData.length === 0) return undefined
+    const min = Math.min(...impData)
+    const max = Math.max(...impData)
+    const range = max - min
+    const pad = Math.max(50, Math.floor(range * 0.2))
+    return [min - pad, max + pad]
+  })()
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold tracking-tight">Progress Tracking</h1>
-        <p className="text-muted-foreground mt-2">
-          Track swimmer progress individually and as a group
-        </p>
-      </div>
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold tracking-tight">Progress Tracking</h1>
+          <p className="text-muted-foreground mt-2">
+            Track swimmer progress individually and as a group
+          </p>
+        </div>
 
-      {/* View Mode Selector */}
-      <div className="mb-6">
-        <Select value={viewMode} onValueChange={(value) => setViewMode(value as 'individual' | 'group')}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Select view" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="individual">Individual</SelectItem>
-            <SelectItem value="group">Group</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+        {/* View Mode Selector */}
+        <div className="mb-6">
+          <Select value={viewMode} onValueChange={(value) => setViewMode(value as 'individual' | 'group')}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select view" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="individual">Individual</SelectItem>
+              <SelectItem value="group">Group</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-      {viewMode === 'individual' ? (
-        <>
-          {/* Filters */}
-          <div className="grid gap-4 md:grid-cols-2 mb-6">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Athlete</label>
-              <Select
-                value={selectedAthlete?.toString()}
-                onValueChange={(value) => setSelectedAthlete(parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select athlete" />
-                </SelectTrigger>
-                <SelectContent>
-                  {athletes.map((athlete) => (
-                    <SelectItem key={athlete.fincode} value={athlete.fincode.toString()}>
-                      {athlete.firstname} {athlete.lastname}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Race</label>
-              <Select
-                value={selectedRace?.toString()}
-                onValueChange={(value) => setSelectedRace(parseInt(value))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select race" />
-                </SelectTrigger>
-                <SelectContent>
-                  {races.map((race) => (
-                    <SelectItem key={race.race_id} value={race.race_id.toString()}>
-                      {race.race_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="text-center py-12">
-              <p>Loading progress data...</p>
-            </div>
-          ) : progressData.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                {selectedAthlete && selectedRace
-                  ? 'No progress data available for this athlete and race'
-                  : 'Select an athlete and race to view progress'}
-              </p>
-            </div>
-          ) : (
-            <>
-              {/* Statistics Cards */}
-              <div className="grid gap-4 md:grid-cols-4 mb-6">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Races</CardTitle>
-                    <Award className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{totalRaces}</div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Best Time</CardTitle>
-                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{formatTime(bestTime)}</div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Average Time</CardTitle>
-                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{formatTime(avgTime)}</div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Improvement</CardTitle>
-                    {totalImprovement > 0 ? (
-                      <TrendingDown className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <TrendingUp className="h-4 w-4 text-red-600" />
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    <div className={`text-2xl font-bold ${totalImprovement > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {totalImprovement > 0 ? '-' : '+'}{Math.abs(totalImprovement / 100).toFixed(2)}s
-                    </div>
-                  </CardContent>
-                </Card>
+        {viewMode === 'individual' ? (
+          <div>
+            {/* Filters */}
+            <div className="grid gap-4 md:grid-cols-4 mb-6">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Group</label>
+                <Select
+                  value={selectedGroup || ''}
+                  onValueChange={(value) => setSelectedGroup(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select group" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {groups.map((group) => (
+                      <SelectItem key={group.id} value={group.group_name}>
+                        {group.group_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              {/* Progress Timeline Chart */}
-              <Card className="mb-6">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Athlete</label>
+                <Select
+                  value={selectedAthlete?.toString()}
+                  onValueChange={(value) => setSelectedAthlete(parseInt(value))}
+                  disabled={!selectedGroup}>
+
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select athlete" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {athletes.map((athlete) => (
+                      <SelectItem key={athlete.fincode} value={athlete.fincode.toString()}>
+                        {athlete.firstname} {athlete.lastname}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">Race</label>
+                <Select
+                  value={selectedRace?.toString()}
+                  onValueChange={(value) => setSelectedRace(parseInt(value))}>
+
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select race" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {races.map((race) => (
+                      <SelectItem key={race.race_id} value={race.race_id.toString()}>
+                        {race.race_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">Course</label>
+                <Select
+                  value={selectedCourse.toString()}
+                  onValueChange={(value) => setSelectedCourse(parseInt(value))}>
+
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">50m</SelectItem>
+                    <SelectItem value="2">25m</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="text-center py-12">
+                <p>Loading progress data...</p>
+              </div>
+            ) : progressData.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  {selectedAthlete && selectedRace
+                    ? 'No progress data available for this athlete and race'
+                    : 'Select a group, athlete, and race to view progress'}
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Statistics Cards */}
+                <div className="grid grid-cols-1 gap-4 mb-6">
+              <Card>
                 <CardHeader>
-                  <CardTitle>Performance Over Time</CardTitle>
+                  <CardTitle>Progress Over Time</CardTitle>
                   <CardDescription>
-                    Time progression across meets (lower is better)
+                    Visualize the swimmer's performance trend and personal bests.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -421,16 +480,19 @@ export function Progress() {
                         dataKey="meet_date" 
                         tickFormatter={(date) => new Date(date).toLocaleDateString()}
                       />
-                      <YAxis 
-                        domain={['dataMin - 100', 'dataMax + 100']}
-                        tickFormatter={(value) => formatTime(value)}
-                      />
+                      <YAxis domain={yDomain ? yDomain : ['dataMin', 'dataMax']} tickFormatter={(value) => `${(value / 1000).toFixed(2)}s`} />
                       <Tooltip
-                        labelFormatter={(date) => new Date(date).toLocaleDateString()}
+                        labelFormatter={(value: any, payload: any) => {
+                          if (payload && Array.isArray(payload) && payload.length > 0) {
+                            const data = payload[0].payload;
+                            return `${new Date(data.meet_date).toLocaleDateString()} (${data.time_str})`;
+                          }
+                          return value ? String(value) : '';
+                        }}
                         formatter={(value: any, name: string | undefined) => {
-                          if (value === undefined) return ['', name || '']
-                          if (name === 'Time') return [formatTime(value), name]
-                          return [value, name || '']
+                          if (name === 'Time') return [formatTime(value), name];
+                          if (value === undefined) return ['', name || ''];
+                          return [value, name || ''];
                         }}
                       />
                       <Legend />
@@ -471,12 +533,12 @@ export function Progress() {
                         dataKey="meet_date" 
                         tickFormatter={(date) => new Date(date).toLocaleDateString()}
                       />
-                      <YAxis tickFormatter={(value) => `${(value / 100).toFixed(2)}s`} />
+                       <YAxis domain={yDomainImprovement ? yDomainImprovement : ['dataMin', 'dataMax']} tickFormatter={(value) => formatDelta(value as number)} />
                       <Tooltip
                         labelFormatter={(date) => new Date(date).toLocaleDateString()}
                         formatter={(value: any) => {
                           if (value === undefined) return ['', 'Improvement']
-                          return [`${(value / 100).toFixed(2)}s`, 'Improvement']
+                          return [formatDelta(value), 'Improvement']
                         }}
                       />
                       <Bar dataKey="improvement">
@@ -519,7 +581,7 @@ export function Progress() {
                             <td className="p-2">{data.meet_name}</td>
                             <td className="text-right p-2">{data.time_str}</td>
                             <td className={`text-right p-2 ${data.improvement > 0 ? 'text-green-600' : data.improvement < 0 ? 'text-red-600' : ''}`}>
-                              {index === 0 ? '-' : `${data.improvement > 0 ? '-' : '+'}${Math.abs(data.improvement / 100).toFixed(2)}s`}
+                              {index === 0 ? '-' : formatDelta(data.improvement)}
                             </td>
                             <td className="text-right p-2">{formatTime(data.best_time)}</td>
                           </tr>
@@ -529,11 +591,12 @@ export function Progress() {
                   </div>
                 </CardContent>
               </Card>
+                </div>
             </>
           )}
-        </>
+        </div>
       ) : (
-        <>
+        <div>
           {/* Group Stats */}
           <div className="grid gap-6">
             {/* Group Performance Overview */}
@@ -596,8 +659,10 @@ export function Progress() {
               </CardContent>
             </Card>
           </div>
-        </>
+        </div>
       )}
     </div>
   )
 }
+
+export default Progress
