@@ -68,6 +68,13 @@ const tools = [
     path: '/import-lenex',
   },
   {
+    title: 'Import JSON',
+    description: 'Import data from JSON files',
+    icon: Upload,
+    action: 'Import File',
+    path: '/import-json',
+  },
+  {
     title: 'Progress Tracking',
     description: 'Track swimmer progress individually and as a group',
     icon: LineChart,

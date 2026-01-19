@@ -362,11 +362,19 @@ export function Meets() {
           const event = eventMap.get(eventKey)
           // Calculate total time as sum of all leg times
           const totalTime = (r.leg1_res_time || 0) + (r.leg2_res_time || 0) + (r.leg3_res_time || 0) + (r.leg4_res_time || 0)
+          // Map numeric status to string result_status (treat null/undefined as FINISHED)
+          let result_status = 'FINISHED'
+          if (r.status === 1) result_status = 'DSQ'
+          else if (r.status === 2) result_status = 'DNF'
+          else if (r.status === 3) result_status = 'DNS'
+          // else if r.status === 4 or null/undefined, it's 'FINISHED'
+          
           return {
             ...r,
             event: event,
             race: event?.race,
-            totalTime: totalTime
+            totalTime: totalTime,
+            result_status: result_status
           }
         })
         
@@ -1297,12 +1305,30 @@ export function Meets() {
       return
     }
 
+    // Convert status string to numeric value for database
+    let statusNumeric: number
+    switch (statusToUse) {
+      case 'DSQ':
+        statusNumeric = 1
+        break
+      case 'DNF':
+        statusNumeric = 2
+        break
+      case 'DNS':
+        statusNumeric = 3
+        break
+      case 'FINISHED':
+      default:
+        statusNumeric = 4
+        break
+    }
+
     try {
       const { error } = await supabase
         .from('results')
         .update({ 
           res_time_decimal: milliseconds,
-          result_status: statusToUse
+          status: statusNumeric
         })
         .eq('res_id', editingResult.res_id)
 
@@ -1321,6 +1347,7 @@ export function Meets() {
       setEditingResult(null)
       setResultTimeInput('')
     } catch (error) {
+      console.error('Error updating result:', error)
       alert('Failed to update result')
     }
   }
@@ -1394,6 +1421,24 @@ export function Meets() {
       }
     }
 
+    // Convert status string to numeric value for database
+    let statusNumeric: number
+    switch (statusToUse) {
+      case 'DSQ':
+        statusNumeric = 1
+        break
+      case 'DNF':
+        statusNumeric = 2
+        break
+      case 'DNS':
+        statusNumeric = 3
+        break
+      case 'FINISHED':
+      default:
+        statusNumeric = 4
+        break
+    }
+
     try {
       const { error } = await supabase
         .from('relay_results')
@@ -1402,7 +1447,7 @@ export function Meets() {
           leg2_res_time: leg2Time,
           leg3_res_time: leg3Time,
           leg4_res_time: leg4Time,
-          result_status: statusToUse
+          status: statusNumeric
         })
         .eq('relay_result_id', editingRelayResult.relay_result_id)
 
@@ -2056,21 +2101,41 @@ export function Meets() {
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto space-y-3">
               <div className="space-y-2">
+                {/* Header Row */}
+                <div className="grid grid-cols-[80px_1fr_1fr] gap-3 px-2 pb-2 border-b">
+                  <span className="text-xs font-semibold text-muted-foreground">Distance</span>
+                  <span className="text-xs font-semibold text-muted-foreground">Split Time</span>
+                  <span className="text-xs font-semibold text-muted-foreground">Lap Time</span>
+                </div>
+                
                 {splitInputs.map((input, idx) => {
                   // Find the matching split from the database
                   const existingSplit = selectedResult.splits.find(s => s.distance === input.distance)
                   
+                  // Calculate lap time (difference from previous split)
+                  let lapTime = ''
+                  if (idx > 0) {
+                    const prevSplit = selectedResult.splits.find(s => s.distance === splitInputs[idx - 1].distance)
+                    if (existingSplit && prevSplit && existingSplit.split_time && prevSplit.split_time) {
+                      const lapTimeMs = existingSplit.split_time - prevSplit.split_time
+                      lapTime = formatTime(lapTimeMs)
+                    }
+                  } else if (existingSplit?.split_time) {
+                    // First split is the lap time itself
+                    lapTime = formatTime(existingSplit.split_time)
+                  }
+                  
                   return (
                     <div
                       key={`${input.distance}-${idx}`}
-                      className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg"
+                      className="grid grid-cols-[80px_1fr_1fr] items-center gap-3 p-2 bg-muted/30 rounded-lg"
                     >
-                      <span className="text-base font-bold text-primary w-16">
+                      <span className="text-base font-bold text-primary">
                         {input.distance}m
                       </span>
                       
                       {editingSplits ? (
-                        <div className="flex-1">
+                        <div>
                           <Input
                             ref={(el) => {
                               if (el) inputRefs.current.set(idx, el)
@@ -2199,10 +2264,14 @@ export function Meets() {
                           />
                         </div>
                       ) : (
-                        <span className="text-base font-mono font-medium flex-1">
+                        <span className="text-base font-mono font-medium">
                           {existingSplit?.formattedTime || input.timeInput !== '__:__.__' ? formattedTimeToDisplay(input.timeInput) : '--:--.--'}
                         </span>
                       )}
+                      
+                      <span className="text-base font-mono font-medium text-muted-foreground">
+                        {lapTime || '--:--.--'}
+                      </span>
                     </div>
                   )
                 })}

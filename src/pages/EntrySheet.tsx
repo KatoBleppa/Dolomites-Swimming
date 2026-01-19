@@ -209,7 +209,7 @@ export function EntrySheet() {
             display: none !important;
           }
           .print-content table {
-            font-size: 9px;
+            font-size: 12px;
             width: 100%;
           }
           .print-content th,

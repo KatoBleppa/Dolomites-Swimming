@@ -12,6 +12,7 @@ import { AttTrend } from './pages/AttTrend'
 import { DatabaseTest } from './pages/DatabaseTest'
 import { PB } from './pages/PB'
 import { ImportLenex } from './pages/ImportLenex'
+import { ImportJson } from './pages/ImportJson'
 import { Progress } from './pages/Progress'
 import { EntrySheet } from './pages/EntrySheet'
 import { SeasonProvider } from './contexts/SeasonContext'
@@ -33,6 +34,7 @@ function App() {
             <Route path="/atttrend" element={<AttTrend />} />
             <Route path="/pb" element={<PB />} />
             <Route path="/import-lenex" element={<ImportLenex />} />
+            <Route path="/import-json" element={<ImportJson />} />
             <Route path="/progress" element={<Progress />} />
             <Route path="/entry-sheet" element={<EntrySheet />} />
             <Route path="/test" element={<DatabaseTest />} />
