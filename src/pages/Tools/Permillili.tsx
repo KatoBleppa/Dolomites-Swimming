@@ -2,9 +2,13 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
-import { Hash, TrendingUp, Download } from 'lucide-react'
+import { Hash, TrendingUp, Download, FileText } from 'lucide-react'
 import { useSeason } from '@/contexts/SeasonContext'
 import * as XLSX from 'xlsx'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import bolzanoLogo from '@/assets/bolzano-nuoto-logo.png'
+import finLogo from '@/assets/fin-logo.png'
 
 interface PermilliResult {
   res_id: number
@@ -132,6 +136,117 @@ export function Permillili() {
     XLSX.writeFile(wb, filename)
   }
 
+  async function exportToPDF() {
+    if (results.length === 0) return
+
+    const doc = new jsPDF('p', 'mm', 'a4') // portrait orientation
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const pageHeight = doc.internal.pageSize.getHeight()
+    
+    // Add logos at the top
+    try {
+      // Load and add Bolzano Nuoto logo (left)
+      doc.addImage(bolzanoLogo, 'PNG', 10, 10, 30, 15)
+      
+      // Load and add FIN logo (right)
+      doc.addImage(finLogo, 'PNG', pageWidth - 40, 10, 30, 15)
+    } catch (error) {
+      console.error('Error adding logos:', error)
+      // Continue without logos if they fail to load
+    }
+    
+    // Title
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Permillili Rankings', pageWidth / 2, 32, { align: 'center' })
+    
+    // Subtitle with season and course info
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    const courseType = course === 1 ? 'LC (50m)' : 'SC (25m)'
+    doc.text(`${currentSeason?.season_name} | ${courseType}`, pageWidth / 2, 38, { align: 'center' })
+    
+    // Prepare table data
+    const tableData = results.map((result, index) => [
+      index + 1,
+      `${result.athlete_firstname} ${result.athlete_lastname}`,
+      result.athlete_gender,
+      `${result.race_distance}m ${result.race_stroke_short}`,
+      result.res_time_str,
+      result.lim_time_str,
+      result.permillili,
+      result.meet_name,
+      result.min_date
+    ])
+    
+    // Add table
+    autoTable(doc, {
+      head: [['Rank', 'Athlete', 'Gender', 'Event', 'Result', 'Limit', 'Points', 'Meet', 'Date']],
+      body: tableData,
+      startY: 45,
+      theme: 'striped',
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontStyle: 'bold',
+        halign: 'center',
+        fontSize: 7
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 12 },
+        1: { cellWidth: 40, fontSize: 9 },
+        2: { halign: 'center', cellWidth: 15 },
+        3: { halign: 'center', cellWidth: 23 },
+        4: { halign: 'center', cellWidth: 18 },
+        5: { halign: 'center', cellWidth: 18 },
+        6: { halign: 'center', cellWidth: 15, fontStyle: 'bold' },
+        7: { cellWidth: 40 },
+        8: { halign: 'center', cellWidth: 20 }
+      },
+      styles: {
+        fontSize: 8,
+        cellPadding: 1,
+        lineColor: [200, 200, 200],
+        lineWidth: 0.1,
+        textColor: [0, 0, 0]
+      },
+      margin: { top: 45, left: 5, right: 5, bottom: 15 },
+      tableWidth: 'auto',
+      didParseCell: (data) => {
+        // Apply color to Points column (column index 6)
+        if (data.column.index === 6 && data.section === 'body') {
+          const points = parseInt(data.cell.text[0])
+          if (points >= 1000) {
+            data.cell.styles.textColor = [22, 163, 74] // green-600
+          } else if (points >= 900) {
+            data.cell.styles.textColor = [37, 99, 235] // blue-600
+          } else {
+            data.cell.styles.textColor = [234, 88, 12] // orange-600
+          }
+        }
+      },
+      didDrawPage: (data) => {
+        // Footer with page numbers
+        doc.setFontSize(8)
+        doc.setFont('helvetica', 'normal')
+        const pageCount = doc.getNumberOfPages()
+        doc.text(
+          `Page ${data.pageNumber} of ${pageCount}`,
+          pageWidth / 2,
+          pageHeight - 10,
+          { align: 'center' }
+        )
+      }
+    })
+    
+    // Generate filename
+    const courseAbbr = course === 1 ? 'LC' : 'SC'
+    const filename = `Permillili_${currentSeason?.season_name}_${courseAbbr}_${new Date().toISOString().split('T')[0]}.pdf`
+    
+    // Save PDF
+    doc.save(filename)
+  }
+
   return (
     <div>
       <div className="mb-8">
@@ -141,10 +256,16 @@ export function Permillili() {
             <h1 className="text-4xl font-bold tracking-tight">Permillili Rankings</h1>
           </div>
           {results.length > 0 && (
-            <Button onClick={exportToExcel} className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              Export to Excel
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={exportToExcel} className="flex items-center gap-2" variant="outline">
+                <Download className="h-4 w-4" />
+                Export to Excel
+              </Button>
+              <Button onClick={exportToPDF} className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Export to PDF
+              </Button>
+            </div>
           )}
         </div>
         <p className="text-muted-foreground">
