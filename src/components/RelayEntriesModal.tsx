@@ -97,15 +97,29 @@ export function RelayEntriesModal({ event, meet, seasonId, onClose, onSave }: Re
       setPersonalBestsCache(pbCache)
 
       // Fetch full athlete details for all athletes with PBs
-      const { data: athletesData, error: athletesError } = await supabase
+      // For mixed relay events (gender "X"), fetch both M and F athletes
+      let athletesQuery = supabase
         .from('athletes')
         .select('*')
         .in('fincode', Array.from(athleteSet))
-        .eq('gender', event.gender)
+      
+      // Only filter by gender if not a mixed event
+      if (event.gender.toLowerCase() !== 'x') {
+        athletesQuery = athletesQuery.eq('gender', event.gender)
+      }
+      
+      const { data: athletesData, error: athletesError } = await athletesQuery
 
       if (athletesError) throw athletesError
 
-      setAvailableAthletes(athletesData || [])
+      // Sort athletes by lastname, then firstname
+      const sortedAthletes = (athletesData || []).sort((a, b) => {
+        const lastnameCompare = a.lastname.toLowerCase().localeCompare(b.lastname.toLowerCase())
+        if (lastnameCompare !== 0) return lastnameCompare
+        return a.firstname.toLowerCase().localeCompare(b.firstname.toLowerCase())
+      })
+
+      setAvailableAthletes(sortedAthletes)
     } catch (error) {
       console.error('Error fetching eligible athletes:', error)
       alert('Failed to load eligible athletes')

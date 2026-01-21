@@ -32,6 +32,7 @@ interface EntrySheetData {
   entry_time_str: string | null
   lim_time_dec: number | null
   lim_time_str: string | null
+  split_times_str: string[]
 }
 
 interface MeetInfo {
@@ -56,6 +57,7 @@ interface EventEntries {
     birthdate: string
     entry_time_str: string
     lim_time_str: string | null
+    split_times_str: string[]
   }[]
 }
 
@@ -128,7 +130,8 @@ export function EntrySheet() {
             lastname: row.lastname,
             birthdate: row.birthdate!,
             entry_time_str: row.entry_time_str || 'NT',
-            lim_time_str: row.lim_time_str
+            lim_time_str: row.lim_time_str,
+            split_times_str: row.split_times_str || []
           })
         }
       })
@@ -295,49 +298,54 @@ export function EntrySheet() {
               {event.entries.length === 0 ? (
                 <p className="text-muted-foreground text-sm">No entries for this event</p>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-4 font-medium">#</th>
-                        <th className="text-left py-2 px-4 font-medium">Name</th>
-                        <th className="text-right py-2 px-4 font-medium">Entry Time</th>
-                        <th className="text-right py-2 px-4 font-medium">Limit Time</th>
-                        <th className="text-center py-2 px-2 font-medium w-12">1</th>
-                        <th className="text-center py-2 px-2 font-medium w-12">2</th>
-                        <th className="text-center py-2 px-2 font-medium w-12">3</th>
-                        <th className="text-center py-2 px-2 font-medium w-12">4</th>
-                        <th className="text-center py-2 px-2 font-medium w-12">5</th>
-                        <th className="text-center py-2 px-2 font-medium w-12">6</th>
-                        <th className="text-center py-2 px-2 font-medium w-12">7</th>
-                        <th className="text-center py-2 px-2 font-medium w-12">8</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {event.entries.map((entry, index) => (
-                        <tr key={entry.res_id} className="border-b hover:bg-muted/50">
-                          <td className="py-2 px-4">{index + 1}</td>
-                          <td className="py-2 px-4">
-                            {entry.lastname} {entry.firstname}
-                          </td>
-                          <td className="py-2 px-4 text-right font-mono">
-                            {entry.entry_time_str}
-                          </td>
-                          <td className="py-2 px-4 text-right font-mono">
-                            {entry.lim_time_str || '-'}
-                          </td>
-                          <td className="py-2 px-2 border-l"><div className="h-8 w-12"></div></td>
-                          <td className="py-2 px-2 border-l"><div className="h-8 w-12"></div></td>
-                          <td className="py-2 px-2 border-l"><div className="h-8 w-12"></div></td>
-                          <td className="py-2 px-2 border-l"><div className="h-8 w-12"></div></td>
-                          <td className="py-2 px-2 border-l"><div className="h-8 w-12"></div></td>
-                          <td className="py-2 px-2 border-l"><div className="h-8 w-12"></div></td>
-                          <td className="py-2 px-2 border-l"><div className="h-8 w-12"></div></td>
-                          <td className="py-2 px-2 border-l"><div className="h-8 w-12"></div></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="space-y-4">
+                  {event.entries.map((entry, index) => (
+                    <div key={entry.res_id} className="border rounded-lg p-3">
+                      {/* Name and times as text */}
+                      <div className="mb-2 flex items-center gap-4">
+                        <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
+                        <span className="text-base font-semibold">
+                          {entry.lastname} {entry.firstname}
+                        </span>
+                        <span className="font-mono font-semibold">PB {entry.entry_time_str}</span>
+                        <span className="font-mono text-sm text-muted-foreground">LIM {entry.lim_time_str || '-'}</span>
+                      </div>
+                      
+                      {/* Table with splits only */}
+                      <table className="w-full table-fixed border-collapse">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">1</th>
+                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">2</th>
+                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">3</th>
+                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">4</th>
+                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">5</th>
+                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">6</th>
+                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">7</th>
+                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">8</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {/* Split times row */}
+                          <tr className="bg-muted/30">
+                            {[...Array(8)].map((_, i) => (
+                              <td key={i} className="py-1 px-3 text-center font-mono text-sm border">
+                                {entry.split_times_str[i] || '\u00A0'}
+                              </td>
+                            ))}
+                          </tr>
+                          {/* Empty cells row for recording times */}
+                          <tr className="hover:bg-muted/50">
+                            {[...Array(8)].map((_, i) => (
+                              <td key={i} className="py-2 px-3 border">
+                                <div className="h-8"></div>
+                              </td>
+                            ))}
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>
