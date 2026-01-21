@@ -137,7 +137,7 @@ export function ImportJson() {
   const [athleteMappings, setAthleteMappings] = useState<AthleteMapping[]>([])
   const [relayMappings, setRelayMappings] = useState<RelayMapping[]>([])
   const [availableRaces, setAvailableRaces] = useState<DatabaseRace[]>([])
-  const [databaseEvents, setDatabaseEvents] = useState<DatabaseEvent[]>([])
+  const [, setDatabaseEvents] = useState<DatabaseEvent[]>([])
 
   function handleFileSelect(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -291,26 +291,6 @@ export function ImportJson() {
     let dbEvents: DatabaseEvent[] = []
     
     // Helper function to normalize stroke names for matching
-    const normalizeStroke = (stroke: string): string => {
-      const normalized = stroke.toLowerCase().trim()
-      // Map Italian/German variations to English
-      if (normalized.includes('libero') || normalized.includes('freistil')) {
-        return 'freestyle'
-      }
-      if (normalized.includes('rana') || normalized.includes('brust')) {
-        return 'breaststroke'
-      }
-      if (normalized.includes('dorso') || normalized.includes('rücken')) {
-        return 'backstroke'
-      }
-      if (normalized.includes('farfalla') || normalized.includes('schmetterling')) {
-        return 'butterfly'
-      }
-      if (normalized.includes('misti') || normalized.includes('lagen')) {
-        return 'medley'
-      }
-      return normalized
-    }
     
     // Helper function to normalize gender codes
     const normalizeGender = (gender: string): string => {
