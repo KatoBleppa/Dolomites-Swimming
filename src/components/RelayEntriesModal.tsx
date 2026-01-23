@@ -14,6 +14,8 @@ interface Group {
 interface EventWithRace extends Event {
   race?: Race
   group?: Group
+  group_ids?: number[]
+  group_names?: string[]
 }
 
 interface RelayLeg {
@@ -476,7 +478,7 @@ export function RelayEntriesModal({ event, meet, seasonId, onClose, onSave }: Re
               <CardDescription>
                 {event.race 
                   ? `${event.race.relay_count}x${event.race.distance}m ${event.race.stroke_long_en}` 
-                  : 'Relay Event'} • {event.gender} • {event.group?.group_name || 'Unknown'}
+                  : 'Relay Event'} • {event.gender} • {event.group_names && event.group_names.length > 0 ? event.group_names.join(', ') : (event.group?.group_name || 'Unknown')}
               </CardDescription>
             </div>
             <Button variant="ghost" onClick={onClose}>✕</Button>

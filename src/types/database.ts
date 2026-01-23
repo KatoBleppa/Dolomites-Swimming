@@ -135,6 +135,13 @@ export interface Split {
   updated_at: string
 }
 
+export interface RelaySplit {
+  relay_splits_id: number
+  splits_relay_res_id: number
+  distance: number
+  split_time: number
+}
+
 export interface Session {
   sess_id: number
   date: string
