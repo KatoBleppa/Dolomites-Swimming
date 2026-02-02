@@ -49,16 +49,34 @@ interface EventEntries {
   stroke_short_en: string
   group_name: string
   gender: string
-  entries: {
-    res_id: number
-    fincode: number
-    firstname: string
-    lastname: string
-    birthdate: string
-    entry_time_str: string
-    lim_time_str: string | null
-    split_times_str: string[]
-  }[]
+  entries: (IndividualEntry | RelayEntry)[]
+}
+
+interface IndividualEntry {
+  type: 'individual'
+  res_id: number
+  fincode: number
+  firstname: string
+  lastname: string
+  birthdate: string
+  entry_time_str: string
+  lim_time_str: string | null
+  split_times_str: string[]
+}
+
+interface RelayLegInfo {
+  legNumber: 1 | 2 | 3 | 4
+  fincode: number
+  firstname: string | null
+  lastname: string | null
+  entry_time_str: string
+}
+
+interface RelayEntry {
+  type: 'relay'
+  relay_result_id: number
+  relay_name: string
+  legs: RelayLegInfo[]
 }
 
 export function EntrySheet() {
@@ -124,6 +142,7 @@ export function EntrySheet() {
         // Add entry if athlete data exists
         if (row.fincode && row.firstname && row.lastname) {
           eventsMap.get(eventKey)!.entries.push({
+            type: 'individual',
             res_id: row.res_id!,
             fincode: row.fincode,
             firstname: row.firstname,
@@ -135,6 +154,51 @@ export function EntrySheet() {
           })
         }
       })
+
+      const { data: relayData, error: relayError } = await supabase
+        .from('relay_results')
+        .select('relay_result_id, event_numb, relay_name, leg1_fincode, leg1_entry_time, leg2_fincode, leg2_entry_time, leg3_fincode, leg3_entry_time, leg4_fincode, leg4_entry_time')
+        .eq('meet_id', parseInt(meetId))
+
+      if (relayError) throw relayError
+
+      if (relayData && relayData.length > 0) {
+        const relayFincodes = new Set<number>()
+        relayData.forEach(relay => {
+          relayFincodes.add(relay.leg1_fincode)
+          relayFincodes.add(relay.leg2_fincode)
+          relayFincodes.add(relay.leg3_fincode)
+          relayFincodes.add(relay.leg4_fincode)
+        })
+
+        const { data: relayAthletes, error: relayAthletesError } = await supabase
+          .from('athletes')
+          .select('fincode, firstname, lastname')
+          .in('fincode', Array.from(relayFincodes))
+
+        if (relayAthletesError) throw relayAthletesError
+
+        const relayAthleteMap = new Map(relayAthletes?.map(a => [a.fincode, a]) || [])
+
+        relayData.forEach(relay => {
+          const event = eventsMap.get(relay.event_numb)
+          if (!event) return
+
+          const legs: RelayLegInfo[] = [
+            { legNumber: 1, fincode: relay.leg1_fincode, firstname: relayAthleteMap.get(relay.leg1_fincode)?.firstname || null, lastname: relayAthleteMap.get(relay.leg1_fincode)?.lastname || null, entry_time_str: millisecondsToTimeString(relay.leg1_entry_time) },
+            { legNumber: 2, fincode: relay.leg2_fincode, firstname: relayAthleteMap.get(relay.leg2_fincode)?.firstname || null, lastname: relayAthleteMap.get(relay.leg2_fincode)?.lastname || null, entry_time_str: millisecondsToTimeString(relay.leg2_entry_time) },
+            { legNumber: 3, fincode: relay.leg3_fincode, firstname: relayAthleteMap.get(relay.leg3_fincode)?.firstname || null, lastname: relayAthleteMap.get(relay.leg3_fincode)?.lastname || null, entry_time_str: millisecondsToTimeString(relay.leg3_entry_time) },
+            { legNumber: 4, fincode: relay.leg4_fincode, firstname: relayAthleteMap.get(relay.leg4_fincode)?.firstname || null, lastname: relayAthleteMap.get(relay.leg4_fincode)?.lastname || null, entry_time_str: millisecondsToTimeString(relay.leg4_entry_time) }
+          ]
+
+          event.entries.push({
+            type: 'relay',
+            relay_result_id: relay.relay_result_id,
+            relay_name: relay.relay_name,
+            legs
+          })
+        })
+      }
 
       setEventEntries(Array.from(eventsMap.values()))
     } catch (error) {
@@ -162,6 +226,15 @@ export function EntrySheet() {
     window.print()
     // Remove print class after print dialog closes
     setTimeout(() => document.body.classList.remove('printing'), 100)
+  }
+
+  function millisecondsToTimeString(ms: number | null): string {
+    if (!ms || ms <= 0) return 'NT'
+    const totalSeconds = ms / 1000.0
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = Math.floor(totalSeconds % 60)
+    const centiseconds = Math.round((totalSeconds - Math.floor(totalSeconds)) * 100)
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`
   }
 
   if (!meetId) {
@@ -300,50 +373,84 @@ export function EntrySheet() {
               ) : (
                 <div className="space-y-4">
                   {event.entries.map((entry, index) => (
-                    <div key={entry.res_id} className="border rounded-lg p-3">
-                      {/* Name and times as text */}
-                      <div className="mb-2 flex items-center gap-4">
-                        <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
-                        <span className="text-base font-semibold">
-                          {entry.lastname} {entry.firstname}
-                        </span>
-                        <span className="font-mono font-semibold">PB {entry.entry_time_str}</span>
-                        <span className="font-mono text-sm text-muted-foreground">LIM {entry.lim_time_str || '-'}</span>
-                      </div>
-                      
-                      {/* Table with splits only */}
-                      <table className="w-full table-fixed border-collapse">
-                        <thead>
-                          <tr className="border-b">
-                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">1</th>
-                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">2</th>
-                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">3</th>
-                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">4</th>
-                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">5</th>
-                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">6</th>
-                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">7</th>
-                            <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">8</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {/* Split times row */}
-                          <tr className="bg-muted/30">
-                            {[...Array(8)].map((_, i) => (
-                              <td key={i} className="py-1 px-3 text-center font-mono text-sm border">
-                                {entry.split_times_str[i] || '\u00A0'}
-                              </td>
-                            ))}
-                          </tr>
-                          {/* Empty cells row for recording times */}
-                          <tr className="hover:bg-muted/50">
-                            {[...Array(8)].map((_, i) => (
-                              <td key={i} className="py-2 px-3 border">
-                                <div className="h-8"></div>
-                              </td>
-                            ))}
-                          </tr>
-                        </tbody>
-                      </table>
+                    <div key={entry.type === 'individual' ? entry.res_id : entry.relay_result_id} className="border rounded-lg p-3">
+                      {entry.type === 'individual' ? (
+                        <>
+                          {/* Name and times as text */}
+                          <div className="mb-2 flex items-center gap-4">
+                            <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
+                            <span className="text-base font-semibold">
+                              {entry.lastname} {entry.firstname}
+                            </span>
+                            <span className="font-mono font-semibold">PB {entry.entry_time_str}</span>
+                            <span className="font-mono text-sm text-muted-foreground">LIM {entry.lim_time_str || '-'}</span>
+                          </div>
+
+                          {/* Table with splits only */}
+                          <table className="w-full table-fixed border-collapse">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">1</th>
+                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">2</th>
+                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">3</th>
+                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">4</th>
+                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">5</th>
+                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">6</th>
+                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">7</th>
+                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">8</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {/* Split times row */}
+                              <tr className="bg-muted/30">
+                                {[...Array(8)].map((_, i) => (
+                                  <td key={i} className="py-1 px-3 text-center font-mono text-sm border">
+                                    {entry.split_times_str[i] || '\u00A0'}
+                                  </td>
+                                ))}
+                              </tr>
+                              {/* Empty cells row for recording times */}
+                              <tr className="hover:bg-muted/50">
+                                {[...Array(8)].map((_, i) => (
+                                  <td key={i} className="py-2 px-3 border">
+                                    <div className="h-8"></div>
+                                  </td>
+                                ))}
+                              </tr>
+                            </tbody>
+                          </table>
+                        </>
+                      ) : (
+                        <>
+                          <div className="mb-2 flex items-center gap-4">
+                            <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
+                            <span className="text-base font-semibold">{entry.relay_name}</span>
+                            <span className="text-sm text-muted-foreground">Relay</span>
+                          </div>
+                          <table className="w-full table-fixed border-collapse">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left py-2 px-3 font-medium text-xs border w-1/12">Leg</th>
+                                <th className="text-left py-2 px-3 font-medium text-xs border">Athlete</th>
+                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/6">PB</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {entry.legs.map(leg => (
+                                <tr key={leg.legNumber} className="hover:bg-muted/50">
+                                  <td className="py-2 px-3 border text-sm font-medium">{leg.legNumber}</td>
+                                  <td className="py-2 px-3 border text-sm">
+                                    {leg.lastname && leg.firstname ? `${leg.lastname} ${leg.firstname}` : 'Unknown athlete'}
+                                  </td>
+                                  <td className="py-2 px-3 border text-center font-mono text-sm">
+                                    {leg.entry_time_str}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>

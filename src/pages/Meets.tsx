@@ -2378,6 +2378,14 @@ export function Meets() {
                                 <span className={`text-base font-bold ${result.result_status !== 'FINISHED' ? 'text-destructive' : 'font-mono'}`}>
                                   {formatResultDisplay(result)}
                                 </span>
+                                {result.note && (
+                                  <span
+                                    className="text-xs text-muted-foreground max-w-[160px] truncate"
+                                    title={result.note}
+                                  >
+                                    {result.note}
+                                  </span>
+                                )}
                                 <Button
                                   size="sm"
                                   variant="ghost"

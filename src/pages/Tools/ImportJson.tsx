@@ -862,9 +862,12 @@ export function ImportJson() {
                 event_numb: eventMapping.eventNumber,
                 res_time_decimal: timeDecimal,
                 status: resultStatus,
-                entry_time_decimal: 0
+                entry_time_decimal: 0,
+                note: typeof result.note === 'string' && result.note.trim().length > 0
+                  ? result.note.trim()
+                  : null
               }, {
-                onConflict: 'fincode,meet_id,event_numb',
+                onConflict: 'fincode,meet_id,event_numb,res_time_decimal',
                 ignoreDuplicates: false
               })
               .select('res_id')

@@ -15,6 +15,7 @@ const AttSumm = lazy(() => import('./pages/Tools/AttSumm').then(m => ({ default:
 const AttTrend = lazy(() => import('./pages/Tools/AttTrend').then(m => ({ default: m.AttTrend })))
 const PB = lazy(() => import('./pages/Tools/PB').then(m => ({ default: m.PB })))
 const ImportLenex = lazy(() => import('./pages/Tools/ImportLenex').then(m => ({ default: m.ImportLenex })))
+const ImportEntries = lazy(() => import('./pages/Tools/ImportEntries').then(m => ({ default: m.ImportEntries })))
 const ImportJson = lazy(() => import('./pages/Tools/ImportJson').then(m => ({ default: m.ImportJson })))
 const Progress = lazy(() => import('./pages/Tools/Progress').then(m => ({ default: m.Progress })))
 const EntrySheet = lazy(() => import('./pages/EntrySheet').then(m => ({ default: m.EntrySheet })))
@@ -38,6 +39,7 @@ function App() {
               <Route path="/atttrend" element={<AttTrend />} />
               <Route path="/pb" element={<PB />} />
               <Route path="/import-lenex" element={<ImportLenex />} />
+              <Route path="/import-entries" element={<ImportEntries />} />
               <Route path="/import-json" element={<ImportJson />} />
               <Route path="/progress" element={<Progress />} />
               <Route path="/entry-sheet" element={<EntrySheet />} />

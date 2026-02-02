@@ -121,6 +121,7 @@ export interface Result {
   res_time_decimal: number
   entry_time_decimal?: number
   entry_time_res_id?: number
+  note?: string | null
   result_status: ResultStatus
   created_at: string
   updated_at: string
