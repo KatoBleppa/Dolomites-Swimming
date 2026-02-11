@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -459,7 +460,9 @@ export function Trainings() {
                 <Button className="flex-1" onClick={() => {
                   openEditMode(selectedSession)
                 }}>Edit Session</Button>
-                <Button variant="outline" className="flex-1">View Attendance</Button>
+                <Button variant="outline" className="flex-1" asChild>
+                  <Link to="/attendance" onClick={() => setSelectedSession(null)}>View Attendance</Link>
+                </Button>
                 <Button variant="destructive" onClick={handleDeleteSession}>Delete</Button>
               </div>
             </CardContent>

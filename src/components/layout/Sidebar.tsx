@@ -9,14 +9,14 @@ import {
   CheckSquare
 } from 'lucide-react'
 import { useSeason } from '@/contexts/SeasonContext'
-import dolomitesLogo from '@/assets/dolomites-logo-2.gif'
+import dolomitesLogo from '@/assets/Logo_02.png'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Meets', href: '/meets', icon: Trophy },
   { name: 'Athletes', href: '/athletes', icon: Users },
   { name: 'Trainings', href: '/trainings', icon: Dumbbell },
   { name: 'Attendance', href: '/attendance', icon: CheckSquare },
+  { name: 'Meets', href: '/meets', icon: Trophy },
   { name: 'Tools', href: '/tools', icon: Wrench },
 ]
 

@@ -2,7 +2,7 @@
 -- This function fetches athletes from all groups associated with an event via the event_groups pivot table
 -- It also includes personal best times for the specific race and course
 
-CREATE OR REPLACE FUNCTION get_eligible_athletes_for_event(
+CREATE OR REPLACE FUNCTION eligible_athletes(
   p_season_id INTEGER,
   p_event_gender TEXT,
   p_event_ms_id INTEGER,  -- Event ms_id to fetch from all associated groups
@@ -55,10 +55,20 @@ BEGIN
     FROM athletes a
     INNER JOIN roster r ON r.fincode = a.fincode
     INNER JOIN _categories c ON c.cat_id = r.ros_cat_id
-    -- Join with event_groups to get athletes from all associated groups
-    INNER JOIN event_groups eg ON c.cat_group_id = eg.group_id AND eg.ms_id = p_event_ms_id
+    INNER JOIN events ev ON ev.ms_id = p_event_ms_id
+    LEFT JOIN event_groups eg ON eg.ms_id = p_event_ms_id AND eg.group_id = c.cat_group_id
     WHERE r.season_id = p_season_id
       AND (a.gender = p_event_gender OR p_event_gender = 'X')
+      AND (
+        EXISTS (
+          SELECT 1 FROM event_groups eg_check WHERE eg_check.ms_id = p_event_ms_id
+        )
+        AND eg.group_id IS NOT NULL
+        OR NOT EXISTS (
+          SELECT 1 FROM event_groups eg_check WHERE eg_check.ms_id = p_event_ms_id
+        )
+        AND (ev.ms_group_id IS NULL OR c.cat_group_id = ev.ms_group_id)
+      )
   )
   SELECT 
     athlete_pbs.fincode,

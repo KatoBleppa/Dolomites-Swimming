@@ -83,6 +83,7 @@ export function Meets() {
   const [meetEvents, setMeetEvents] = useState<EventWithRace[]>([])
   const [eventEntryCounts, setEventEntryCounts] = useState<Map<number, number>>(new Map())
   const [loadingEvents, setLoadingEvents] = useState(false)
+  const [meetGroupsMap, setMeetGroupsMap] = useState<Map<number, string[]>>(new Map())
   const [availableRaces, setAvailableRaces] = useState<Race[]>([])
   const [editingEvent, setEditingEvent] = useState<EventWithRace | null>(null)
   const [creatingEvent, setCreatingEvent] = useState(false)
@@ -146,6 +147,52 @@ export function Meets() {
       if (error) throw error
       setAllGroups(data || [])
     } catch (error) {
+    }
+  }
+
+  async function loadMeetGroups(meetsList: Meet[]) {
+    if (meetsList.length === 0) {
+      setMeetGroupsMap(new Map())
+      return
+    }
+
+    try {
+      const meetIds = meetsList.map(meet => meet.meet_id)
+      const { data: meetGroupsData, error: meetGroupsError } = await supabase
+        .from('meet_groups')
+        .select('meet_id, group_id')
+        .in('meet_id', meetIds)
+
+      if (meetGroupsError) throw meetGroupsError
+
+      let groups = allGroups
+      if (groups.length === 0) {
+        const { data: groupsData, error: groupsError } = await supabase
+          .from('_groups')
+          .select('*')
+          .order('id', { ascending: true })
+
+        if (groupsError) throw groupsError
+        groups = groupsData || []
+        setAllGroups(groups)
+      }
+
+      const groupNameMap = new Map(groups.map(group => [group.id, group.group_name]))
+      const nextMap = new Map<number, string[]>()
+
+      ;(meetGroupsData || []).forEach(row => {
+        const name = groupNameMap.get(row.group_id)
+        if (!name) return
+        const existing = nextMap.get(row.meet_id) || []
+        if (!existing.includes(name)) {
+          existing.push(name)
+        }
+        nextMap.set(row.meet_id, existing)
+      })
+
+      setMeetGroupsMap(nextMap)
+    } catch (error) {
+      setMeetGroupsMap(new Map())
     }
   }
 
@@ -214,11 +261,18 @@ export function Meets() {
         .order('min_date', { ascending: false })
 
       if (error) throw error
-      setMeets(data || [])
+      const meetsData = data || []
+      setMeets(meetsData)
+      await loadMeetGroups(meetsData)
     } catch (error) {
     } finally {
       setLoading(false)
     }
+  }
+
+  function getMeetGroupsLabel(meetId: number): string {
+    const groupNames = meetGroupsMap.get(meetId) || []
+    return groupNames.length > 0 ? groupNames.join(', ') : 'All'
   }
 
   const filteredMeets = meets.filter(meet =>
@@ -2082,6 +2136,9 @@ export function Meets() {
                     <MapPin className="h-3 w-3" />
                     {meet.place}, {meet.nation}
                   </CardDescription>
+                  <p className="text-xs text-muted-foreground">
+                    {getMeetGroupsLabel(meet.meet_id)}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2 text-sm">
@@ -2118,6 +2175,10 @@ export function Meets() {
                 <div>
                   <p className="text-sm font-medium">Location</p>
                   <p className="text-sm text-muted-foreground">{selectedMeet.place}, {selectedMeet.nation}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Groups</p>
+                  <p className="text-sm text-muted-foreground">{getMeetGroupsLabel(selectedMeet.meet_id)}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Pool</p>

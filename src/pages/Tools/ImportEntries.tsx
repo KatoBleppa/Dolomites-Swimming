@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { AlertCircle, CheckCircle, Upload, XCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle, Upload, XCircle, Info } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useSeason } from '@/contexts/SeasonContext'
 
@@ -688,7 +688,7 @@ export function ImportEntries() {
         const chunk = entriesToInsert.slice(i, i + chunkSize)
         const { error: insertError } = await supabase
           .from('results')
-          .upsert(chunk, { onConflict: 'fincode,meet_id,event_numb', ignoreDuplicates: false })
+          .upsert(chunk, { onConflict: 'fincode,meet_id,event_numb,res_time_decimal', ignoreDuplicates: false })
 
         if (insertError) {
           errors.push(`Failed to import entries batch ${i / chunkSize + 1}: ${insertError.message}`)
@@ -1016,6 +1016,16 @@ export function ImportEntries() {
               }}>
                 Import another file
               </Button>
+            </div>
+            <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+              <div className="flex items-center gap-2 font-medium">
+                <Info className="h-4 w-4" />
+                Remember to:
+              </div>
+              <ul className="mt-2 list-disc space-y-1 pl-6">
+                <li>Manually add the event_groups rows (ms_id &amp; group_id).</li>
+                <li>Run the function "select update_entries_with_pb()".</li>
+              </ul>
             </div>
           </CardContent>
         </Card>
