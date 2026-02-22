@@ -5,34 +5,6 @@ import { useNavigate } from 'react-router-dom'
 
 const tools = [
   {
-    title: 'Pace Calculator',
-    description: 'Calculate swim paces for different distances',
-    icon: Calculator,
-    action: 'Open Calculator',
-    path: null,
-  },
-  {
-    title: 'Time Converter',
-    description: 'Convert between different time formats',
-    icon: Clock,
-    action: 'Open Converter',
-    path: null,
-  },
-  {
-    title: 'Meet Results',
-    description: 'Analyze and compare meet results',
-    icon: Award,
-    action: 'View Results',
-    path: null,
-  },
-  {
-    title: 'Performance Analytics',
-    description: 'Track athlete performance over time',
-    icon: BarChart3,
-    action: 'View Analytics',
-    path: null,
-  },
-  {
     title: 'Permillili',
     description: 'Show the best points for every swimmer',
     icon: Hash,
@@ -52,6 +24,13 @@ const tools = [
     icon: TrendingUp,
     action: 'View Trend',
     path: '/atttrend',
+  },
+  {
+    title: 'Training Trendy',
+    description: 'View weekly training volume for the active season',
+    icon: LineChart,
+    action: 'View Trend',
+    path: '/training-trendy',
   },
   {
     title: 'Personal Bests',

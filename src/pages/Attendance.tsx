@@ -190,15 +190,15 @@ export function Attendance() {
 
   function getStatusIcon(status?: number) {
     if (status === 0) return <Check className="h-5 w-5 text-green-600" />
-    if (status === 1) return <ShieldCheck className="h-5 w-5 text-blue-600" />
-    if (status === 2) return <Clock className="h-5 w-5 text-yellow-600" />
+    if (status === 1) return <Clock className="h-5 w-5 text-yellow-600" />
+    if (status === 2) return <ShieldCheck className="h-5 w-5 text-blue-600" />
     if (status === 3) return <X className="h-5 w-5 text-red-600" />
     return null
   }
 
   const presentCount = athletes.filter(a => a.attendance_status === 0).length
-  const justifiedCount = athletes.filter(a => a.attendance_status === 1).length
-  const lateCount = athletes.filter(a => a.attendance_status === 2).length
+  const lateCount = athletes.filter(a => a.attendance_status === 1).length
+  const justifiedCount = athletes.filter(a => a.attendance_status === 2).length
   const absentCount = athletes.filter(a => a.attendance_status === 3).length
 
   // Calendar functions
@@ -443,9 +443,9 @@ export function Attendance() {
                           onClick={() => updateAttendance(athlete, 1)}
                           disabled={savingAttendance}
                           className="h-8 w-8 p-0"
-                          title="Justified"
+                          title="Late"
                         >
-                          <ShieldCheck className="h-4 w-4" />
+                          <Clock className="h-4 w-4" />
                         </Button>
                         <Button
                           size="sm"
@@ -453,9 +453,9 @@ export function Attendance() {
                           onClick={() => updateAttendance(athlete, 2)}
                           disabled={savingAttendance}
                           className="h-8 w-8 p-0"
-                          title="Late"
+                          title="Justified"
                         >
-                          <Clock className="h-4 w-4" />
+                          <ShieldCheck className="h-4 w-4" />
                         </Button>
                         <Button
                           size="sm"

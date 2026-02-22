@@ -18,6 +18,7 @@ const ImportLenex = lazy(() => import('./pages/Tools/ImportLenex').then(m => ({ 
 const ImportEntries = lazy(() => import('./pages/Tools/ImportEntries').then(m => ({ default: m.ImportEntries })))
 const ImportJson = lazy(() => import('./pages/Tools/ImportJson').then(m => ({ default: m.ImportJson })))
 const Progress = lazy(() => import('./pages/Tools/Progress').then(m => ({ default: m.Progress })))
+const TrainingTrendy = lazy(() => import('./pages/Tools/TrainingTrendy').then(m => ({ default: m.TrainingTrendy })))
 const EntrySheet = lazy(() => import('./pages/EntrySheet').then(m => ({ default: m.EntrySheet })))
 const DatabaseTest = lazy(() => import('./pages/DatabaseTest').then(m => ({ default: m.DatabaseTest })))
 
@@ -42,6 +43,7 @@ function App() {
               <Route path="/import-entries" element={<ImportEntries />} />
               <Route path="/import-json" element={<ImportJson />} />
               <Route path="/progress" element={<Progress />} />
+              <Route path="/training-trendy" element={<TrainingTrendy />} />
               <Route path="/entry-sheet" element={<EntrySheet />} />
               <Route path="/test" element={<DatabaseTest />} />
             </Routes>
