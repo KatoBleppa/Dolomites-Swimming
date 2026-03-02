@@ -139,6 +139,49 @@ export function ImportJson() {
   const [availableRaces, setAvailableRaces] = useState<DatabaseRace[]>([])
   const [, setDatabaseEvents] = useState<DatabaseEvent[]>([])
 
+  const formatMillisecondsToTimeString = (milliseconds: number): string => {
+    const safeMilliseconds = Math.max(0, Math.round(milliseconds))
+    const totalCentiseconds = Math.round(safeMilliseconds / 10)
+    const minutes = Math.floor(totalCentiseconds / 6000)
+    const seconds = Math.floor((totalCentiseconds % 6000) / 100)
+    const hundredths = totalCentiseconds % 100
+
+    if (minutes > 0) {
+      return `${minutes}:${seconds.toString().padStart(2, '0')}.${hundredths.toString().padStart(2, '0')}`
+    }
+
+    return `${seconds}.${hundredths.toString().padStart(2, '0')}`
+  }
+
+  const normalizeJsonTime = (rawTime: unknown): string => {
+    if (rawTime === null || rawTime === undefined) {
+      return ''
+    }
+
+    if (typeof rawTime === 'number' && Number.isFinite(rawTime)) {
+      return formatMillisecondsToTimeString(rawTime)
+    }
+
+    const rawString = String(rawTime).trim()
+    if (!rawString) {
+      return ''
+    }
+
+    const timeUpper = rawString.toUpperCase()
+    if (timeUpper === 'DQ' || timeUpper === 'DNF' || timeUpper === 'DNS') {
+      return timeUpper
+    }
+
+    if (/^\d+$/.test(rawString)) {
+      const milliseconds = Number(rawString)
+      if (Number.isFinite(milliseconds)) {
+        return formatMillisecondsToTimeString(milliseconds)
+      }
+    }
+
+    return rawString.replace(',', '.')
+  }
+
   function handleFileSelect(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (file) {
@@ -616,7 +659,8 @@ export function ImportJson() {
         
         // Determine status
         let resultStatus = 4 // Normal
-        const timeUpper = result.time?.toUpperCase() || ''
+        const normalizedRelayTotalTime = normalizeJsonTime(result.time)
+        const timeUpper = normalizedRelayTotalTime.toUpperCase()
         if (timeUpper === 'DQ') resultStatus = 1
         else if (timeUpper === 'DNF') resultStatus = 2
         else if (timeUpper === 'DNS') resultStatus = 3
@@ -626,7 +670,7 @@ export function ImportJson() {
           resultIndex: index,
           relayName: result.name || `Bolzano Nuoto ${String.fromCharCode(65 + relayMappings.filter(r => r.eventNumber === event.event_number).length)}`,
           legs,
-          totalTime: result.time || '00:00.00',
+          totalTime: normalizedRelayTotalTime || '00:00.00',
           status: resultStatus
         })
       })
@@ -788,7 +832,9 @@ export function ImportJson() {
             continue
           }
           
-          if (!result.time) {
+          const normalizedResultTime = normalizeJsonTime(result.time)
+
+          if (!normalizedResultTime) {
             errors.push(`Skipping result without time`)
             continue
           }
@@ -823,7 +869,7 @@ export function ImportJson() {
             let timeDecimal: number
             let resultStatus: number
             
-            const timeUpper = result.time.toUpperCase()
+            const timeUpper = normalizedResultTime.toUpperCase()
             
             if (timeUpper === 'DQ') {
               // Disqualification
@@ -843,10 +889,10 @@ export function ImportJson() {
             } else {
               // Normal finished time
               const { data: timeData, error: timeError } = await supabase
-                .rpc('timestr_to_totaltime', { time_str: result.time })
+                .rpc('timestr_to_totaltime', { time_str: normalizedResultTime })
               
               if (timeError) {
-                throw new Error(`Failed to convert time ${result.time}: ${timeError.message}`)
+                throw new Error(`Failed to convert time ${normalizedResultTime}: ${timeError.message}`)
               }
               
               timeDecimal = timeData || 0
@@ -896,7 +942,7 @@ export function ImportJson() {
               const splitInterval = totalDistance / result.splits.length
 
               for (let i = 0; i < result.splits.length; i++) {
-                const splitTime = result.splits[i]
+                const splitTime = normalizeJsonTime(result.splits[i])
                 if (!splitTime) continue
 
                 try {
@@ -944,11 +990,16 @@ export function ImportJson() {
           // Convert leg times
           const legTimes: number[] = []
           for (const leg of relayMapping.legs) {
+            const normalizedLegTime = normalizeJsonTime(leg.time)
+            if (!normalizedLegTime) {
+              throw new Error(`Missing leg time for ${leg.name || 'relay leg'}`)
+            }
+
             const { data: timeData, error: timeError } = await supabase
-              .rpc('timestr_to_totaltime', { time_str: leg.time })
+              .rpc('timestr_to_totaltime', { time_str: normalizedLegTime })
             
             if (timeError) {
-              throw new Error(`Failed to convert leg time ${leg.time}: ${timeError.message}`)
+              throw new Error(`Failed to convert leg time ${normalizedLegTime}: ${timeError.message}`)
             }
             legTimes.push(timeData || 0)
           }

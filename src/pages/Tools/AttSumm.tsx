@@ -396,8 +396,8 @@ export function AttSumm() {
                     <th className="text-left p-2">Group</th>
                     <th className="text-right p-2">Sess</th>
                     <th className="text-right p-2">P</th>
-                    <th className="text-right p-2">J</th>
                     <th className="text-right p-2">L</th>
+                    <th className="text-right p-2">J</th>
                     <th className="text-right p-2">A</th>
                     <th className="text-right p-2">%</th>
                     <th className="text-left p-2 min-w-[200px]">Progress</th>
@@ -418,8 +418,8 @@ export function AttSumm() {
                       </td>
                       <td className="p-2 text-right">{stats.total_sessions}</td>
                       <td className="p-2 text-right text-green-600">{stats.present_count}</td>
-                      <td className="p-2 text-right text-blue-600">{stats.justified_count}</td>
                       <td className="p-2 text-right text-yellow-600">{stats.late_count}</td>
+                      <td className="p-2 text-right text-blue-600">{stats.justified_count}</td>
                       <td className="p-2 text-right text-red-600">{stats.absent_count}</td>
                       <td className={`p-2 text-right font-semibold ${getAttendanceColor(stats.attendance_rate)}`}>
                         {stats.attendance_rate.toFixed(1)}%

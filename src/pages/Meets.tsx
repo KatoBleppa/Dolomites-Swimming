@@ -1129,6 +1129,30 @@ export function Meets() {
     }
   }
 
+  async function handleDeleteMeet(meet: Meet) {
+    const confirmed = window.confirm(
+      `Delete meet "${meet.meet_name}"? This action cannot be undone.`
+    )
+
+    if (!confirmed) return
+
+    try {
+      const { error } = await supabase
+        .from('meets')
+        .delete()
+        .eq('meet_id', meet.meet_id)
+
+      if (error) throw error
+
+      setSelectedMeet(null)
+      setViewingResults(false)
+      setViewingEvents(false)
+      await fetchMeets()
+    } catch (error) {
+      alert('Failed to delete meet. It may still have related records (events/results/entries).')
+    }
+  }
+
   async function handleViewEvents(meet: Meet) {
     setSelectedMeet(meet)
     setViewingEvents(true)
@@ -2247,7 +2271,16 @@ export function Meets() {
                 >
                   Events
                 </Button>
-                <Button size="sm" variant="destructive">Delete</Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDeleteMeet(selectedMeet)
+                  }}
+                >
+                  Delete
+                </Button>
               </div>
             </CardContent>
           </Card>

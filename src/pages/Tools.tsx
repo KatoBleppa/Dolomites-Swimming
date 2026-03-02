@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Calculator, Clock, Award, BarChart3, Hash, TrendingUp, Upload, LineChart } from 'lucide-react'
+import { Award, Hash, TrendingUp, Upload, LineChart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const tools = [

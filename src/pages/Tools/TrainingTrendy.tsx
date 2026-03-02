@@ -160,7 +160,7 @@ function WeeklyVolumeChart({
             height={60}
           />
           <YAxis tick={{ fontSize: 12 }} />
-          <Tooltip formatter={(value: number) => [`${value.toLocaleString()} m`, 'Volume']} labelFormatter={(label: string) => `Week ${label}`} />
+          <Tooltip formatter={(value: number | undefined) => [`${(value ?? 0).toLocaleString()} m`, 'Volume']} labelFormatter={(label: string) => `Week ${label}`} />
           <Legend />
           <Line
             type="monotone"

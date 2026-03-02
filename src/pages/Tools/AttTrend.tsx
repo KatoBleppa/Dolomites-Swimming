@@ -56,10 +56,12 @@ function CalendarView({ sessions, monthYear }: CalendarViewProps) {
   // Convert to Monday-based (0 = Monday, 6 = Sunday)
   const startDayMonday = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1
 
-  // Create a map of date to session
-  const sessionMap = new Map<string, DailySession>()
+  // Create a map of date to sessions
+  const sessionMap = new Map<string, DailySession[]>()
   sessions.forEach(session => {
-    sessionMap.set(session.date, session)
+    const existingSessions = sessionMap.get(session.date) || []
+    existingSessions.push(session)
+    sessionMap.set(session.date, existingSessions)
   })
 
   const getStatusColor = (status: string) => {
@@ -128,7 +130,7 @@ function CalendarView({ sessions, monthYear }: CalendarViewProps) {
             }
 
             const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-            const session = sessionMap.get(dateStr)
+            const daySessions = sessionMap.get(dateStr) || []
 
             return (
               <div
@@ -136,9 +138,16 @@ function CalendarView({ sessions, monthYear }: CalendarViewProps) {
                 className="aspect-square border-t border-r p-2 relative"
               >
                 <div className="text-sm font-medium mb-1">{day}</div>
-                {session && (
-                  <div className={`text-xs rounded px-1 py-0.5 ${getStatusColor(session.status_description)}`}>
-                    {session.status_description}
+                {daySessions.length > 0 && (
+                  <div className="space-y-1">
+                    {daySessions.map(session => (
+                      <div
+                        key={session.sess_id}
+                        className={`text-xs rounded px-1 py-0.5 ${getStatusColor(session.status_description)}`}
+                      >
+                        {session.status_description}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
