@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { supabase } from '@/lib/supabase'
+import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 interface Season {
   season_id: number
@@ -27,6 +27,11 @@ export function SeasonProvider({ children }: { children: ReactNode }) {
   }, [])
 
   async function loadSeasons() {
+    if (!isSupabaseConfigured) {
+      setLoading(false)
+      return
+    }
+
     try {
       const { data, error } = await supabase
         .from('_seasons')
