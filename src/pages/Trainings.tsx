@@ -454,7 +454,9 @@ export function Trainings() {
               </div>
               <div>
                 <p className="text-sm font-medium mb-2">Description</p>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedSession.description}</p>
+                <pre className="text-sm text-muted-foreground whitespace-pre overflow-x-auto font-mono rounded-md bg-muted/30 p-3" style={{ tabSize: 4 }}>
+                  {selectedSession.description}
+                </pre>
               </div>
               <div className="flex gap-2 pt-4">
                 <Button className="flex-1" onClick={() => {
@@ -613,8 +615,11 @@ export function Trainings() {
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border rounded-md bg-background min-h-[100px]"
-                    placeholder="Training session details, workout description, focus areas, etc."
+                    wrap="off"
+                    spellCheck={false}
+                    style={{ tabSize: 4 }}
+                    className="w-full px-3 py-2 border rounded-md bg-background min-h-[160px] font-mono whitespace-pre overflow-x-auto"
+                    placeholder="Paste formatted text from Word here"
                   />
                 </div>
                 <div className="flex gap-2 pt-4">
