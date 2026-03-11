@@ -237,6 +237,24 @@ export function EntrySheet() {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`
   }
 
+  function getIndividualEntryLayout(distance: number): { splitCount: number; columns: number } {
+    if (distance <= 100) {
+      return { splitCount: 2, columns: 4 }
+    }
+
+    if (distance === 200) {
+      return { splitCount: 4, columns: 2 }
+    }
+
+    return { splitCount: 0, columns: 1 }
+  }
+
+  function getGridColumnsClass(columns: number): string {
+    if (columns === 4) return 'grid-cols-4'
+    if (columns === 2) return 'grid-cols-2'
+    return 'grid-cols-1'
+  }
+
   if (!meetId) {
     return (
       <div className="text-center py-12">
@@ -292,8 +310,17 @@ export function EntrySheet() {
           .print-content td {
             padding: 2px 4px !important;
           }
+          .print-content .split-time-cell,
+          .print-content .split-number-cell {
+            font-size: 11px !important;
+            line-height: 1 !important;
+            white-space: nowrap;
+          }
           .print-content .event-card {
-            page-break-inside: avoid;
+            page-break-inside: auto;
+            break-inside: auto;
+            page-break-after: auto;
+            break-after: auto;
             margin-bottom: 12px;
             border: 1px solid #ccc;
           }
@@ -303,6 +330,14 @@ export function EntrySheet() {
             padding: 4px 8px;
             background: #f5f5f5;
             border-bottom: 1px solid #ccc;
+          }
+          .print-content .entry-name {
+            display: inline-block;
+            max-width: 10ch;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            vertical-align: bottom;
           }
         }
       `}</style>
@@ -371,59 +406,87 @@ export function EntrySheet() {
               {event.entries.length === 0 ? (
                 <p className="text-muted-foreground text-sm">No entries for this event</p>
               ) : (
-                <div className="space-y-4">
-                  {event.entries.map((entry, index) => (
-                    <div key={entry.type === 'individual' ? entry.res_id : entry.relay_result_id} className="border rounded-lg p-3">
-                      {entry.type === 'individual' ? (
-                        <>
-                          {/* Name and times as text */}
-                          <div className="mb-2 flex items-center gap-4">
-                            <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
-                            <span className="text-base font-semibold">
-                              {entry.lastname} {entry.firstname}
-                            </span>
-                            <span className="font-mono font-semibold">PB {entry.entry_time_str}</span>
-                            <span className="font-mono text-sm text-muted-foreground">LIM {entry.lim_time_str || '-'}</span>
-                          </div>
+                (() => {
+                  const individualEntries = event.entries.filter((entry): entry is IndividualEntry => entry.type === 'individual')
+                  const relayEntries = event.entries.filter((entry): entry is RelayEntry => entry.type === 'relay')
+                  const layout = getIndividualEntryLayout(event.distance)
 
-                          {/* Table with splits only */}
-                          <table className="w-full table-fixed border-collapse">
-                            <thead>
-                              <tr className="border-b">
-                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">1</th>
-                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">2</th>
-                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">3</th>
-                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">4</th>
-                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">5</th>
-                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">6</th>
-                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">7</th>
-                                <th className="text-center py-2 px-3 font-medium text-xs border w-1/8">8</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {/* Split times row */}
-                              <tr className="bg-muted/30">
-                                {[...Array(8)].map((_, i) => (
-                                  <td key={i} className="py-1 px-3 text-center font-mono text-sm border">
-                                    {entry.split_times_str[i] || '\u00A0'}
-                                  </td>
+                  return (
+                    <div className="space-y-4">
+                      {individualEntries.length > 0 && (
+                        <div className={`grid gap-4 ${getGridColumnsClass(layout.columns)}`}>
+                          {individualEntries.map((entry, index) => (
+                            <div key={entry.res_id} className="border rounded-lg p-3">
+                              {(() => {
+                                const expectedDistanceSplits = Math.floor(event.distance / 50)
+                                const splitRows = event.distance > 200
+                                  ? Math.max(expectedDistanceSplits, entry.split_times_str.length, 1)
+                                  : layout.splitCount
+                                const splitColumns = event.distance > 200 ? 4 : 1
+                                const rowsPerColumn = Math.ceil(splitRows / splitColumns)
+
+                                return (
+                                  <>
+                              {layout.columns === 4 ? (
+                                <div className="mb-2 space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
+                                    <span className="entry-name text-base font-semibold" title={`${entry.lastname} ${entry.firstname}`}>
+                                      {entry.lastname} {entry.firstname}
+                                    </span>
+                                  </div>
+                                  <div className="font-mono text-sm font-semibold">PB {entry.entry_time_str}</div>
+                                  <div className="font-mono text-sm text-muted-foreground">LIM {entry.lim_time_str || '-'}</div>
+                                </div>
+                              ) : (
+                                <div className="mb-2 grid grid-cols-3 items-center gap-3">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
+                                    <span className="entry-name text-base font-semibold truncate" title={`${entry.lastname} ${entry.firstname}`}>
+                                      {entry.lastname} {entry.firstname}
+                                    </span>
+                                  </div>
+                                  <div className="font-mono text-sm font-semibold text-center">PB {entry.entry_time_str}</div>
+                                  <div className="font-mono text-sm text-muted-foreground text-right">LIM {entry.lim_time_str || '-'}</div>
+                                </div>
+                              )}
+
+                              <div className={splitColumns === 4 ? 'grid grid-cols-4 gap-2' : ''}>
+                                {[...Array(splitColumns)].map((_, columnIndex) => (
+                                  <table key={columnIndex} className="w-full table-fixed border-collapse">
+                                    <tbody>
+                                      {[...Array(rowsPerColumn)].map((_, rowIndex) => {
+                                        const splitIndex = columnIndex * rowsPerColumn + rowIndex
+                                        if (splitIndex >= splitRows) return null
+
+                                        return (
+                                          <tr key={splitIndex} className="hover:bg-muted/50">
+                                            <td className="split-number-cell w-6 py-1 px-1 text-center align-middle font-medium text-xs border bg-muted/30">{splitIndex + 1}</td>
+                                            <td className="split-time-cell py-1 px-2 text-center align-middle leading-none font-mono text-sm border">
+                                              {entry.split_times_str[splitIndex] || '\u00A0'}
+                                            </td>
+                                            <td className="py-1 px-2 align-middle border">
+                                              <div className={`${layout.columns === 4 ? 'h-6' : 'h-7'}`}></div>
+                                            </td>
+                                          </tr>
+                                        )
+                                      })}
+                                    </tbody>
+                                  </table>
                                 ))}
-                              </tr>
-                              {/* Empty cells row for recording times */}
-                              <tr className="hover:bg-muted/50">
-                                {[...Array(8)].map((_, i) => (
-                                  <td key={i} className="py-2 px-3 border">
-                                    <div className="h-8"></div>
-                                  </td>
-                                ))}
-                              </tr>
-                            </tbody>
-                          </table>
-                        </>
-                      ) : (
-                        <>
+                              </div>
+                                  </>
+                                )
+                              })()}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {relayEntries.map((entry, index) => (
+                        <div key={entry.relay_result_id} className="border rounded-lg p-3">
                           <div className="mb-2 flex items-center gap-4">
-                            <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
+                            <span className="text-sm font-medium text-muted-foreground">#{individualEntries.length + index + 1}</span>
                             <span className="text-base font-semibold">{entry.relay_name}</span>
                             <span className="text-sm text-muted-foreground">Relay</span>
                           </div>
@@ -449,11 +512,11 @@ export function EntrySheet() {
                               ))}
                             </tbody>
                           </table>
-                        </>
-                      )}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  )
+                })()
               )}
             </CardContent>
           </Card>
