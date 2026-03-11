@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { DashboardLayout } from './components/layout/DashboardLayout'
 import { SeasonProvider } from './contexts/SeasonContext'
+import { isSupabaseConfigured } from './lib/supabase'
 
 // Lazy load all pages for better code splitting
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })))
@@ -26,29 +27,39 @@ function App() {
   return (
     <SeasonProvider>
       <BrowserRouter>
-        <DashboardLayout>
-          <Suspense fallback={<div className="flex items-center justify-center h-screen"><div className="text-muted-foreground">Loading...</div></div>}>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/meets" element={<Meets />} />
-              <Route path="/athletes" element={<Athletes />} />
-              <Route path="/trainings" element={<Trainings />} />
-              <Route path="/attendance" element={<Attendance />} />
-              <Route path="/tools" element={<Tools />} />
-              <Route path="/permillili" element={<Permillili />} />
-              <Route path="/attsumm" element={<AttSumm />} />
-              <Route path="/atttrend" element={<AttTrend />} />
-              <Route path="/pb" element={<PB />} />
-              <Route path="/import-lenex" element={<ImportLenex />} />
-              <Route path="/import-entries" element={<ImportEntries />} />
-              <Route path="/import-json" element={<ImportJson />} />
-              <Route path="/progress" element={<Progress />} />
-              <Route path="/training-trendy" element={<TrainingTrendy />} />
-              <Route path="/entry-sheet" element={<EntrySheet />} />
-              <Route path="/test" element={<DatabaseTest />} />
-            </Routes>
-          </Suspense>
-        </DashboardLayout>
+        <div className="h-screen">
+          {!isSupabaseConfigured && (
+            <div className="bg-amber-100 border-b border-amber-300 px-4 py-2 text-sm text-amber-900">
+              Supabase is not configured. Create a <code>.env</code> file from <code>.env.example</code> and set
+              <code> VITE_SUPABASE_URL </code>
+              and
+              <code> VITE_SUPABASE_ANON_KEY</code>.
+            </div>
+          )}
+          <DashboardLayout>
+            <Suspense fallback={<div className="flex items-center justify-center h-screen"><div className="text-muted-foreground">Loading...</div></div>}>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/meets" element={<Meets />} />
+                <Route path="/athletes" element={<Athletes />} />
+                <Route path="/trainings" element={<Trainings />} />
+                <Route path="/attendance" element={<Attendance />} />
+                <Route path="/tools" element={<Tools />} />
+                <Route path="/permillili" element={<Permillili />} />
+                <Route path="/attsumm" element={<AttSumm />} />
+                <Route path="/atttrend" element={<AttTrend />} />
+                <Route path="/pb" element={<PB />} />
+                <Route path="/import-lenex" element={<ImportLenex />} />
+                <Route path="/import-entries" element={<ImportEntries />} />
+                <Route path="/import-json" element={<ImportJson />} />
+                <Route path="/progress" element={<Progress />} />
+                <Route path="/training-trendy" element={<TrainingTrendy />} />
+                <Route path="/entry-sheet" element={<EntrySheet />} />
+                <Route path="/test" element={<DatabaseTest />} />
+              </Routes>
+            </Suspense>
+          </DashboardLayout>
+        </div>
       </BrowserRouter>
     </SeasonProvider>
   )
