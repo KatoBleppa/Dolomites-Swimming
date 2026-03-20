@@ -481,6 +481,7 @@ export function ImportEntries() {
         const matchedEvent = eventsWithRace
           .filter(event =>
             event.race &&
+            event.race.relay_count === 1 &&
             event.race.distance === fileEvent.distance &&
             matchesStroke(event.race, fileEvent.stroke) &&
             normalizeGender(event.gender) === fileEvent.gender &&
@@ -732,6 +733,7 @@ export function ImportEntries() {
     const bNumb = b.dbEventNumb ?? Number.MAX_SAFE_INTEGER
     return aNumb - bNumb
   })
+  const importableMeetEvents = meetEvents.filter(event => event.race?.relay_count === 1)
   const unmatchedAthletes = previewData
     ? previewData.athletes.filter(athlete => {
         const key = `${normalizeText(athlete.lastname)}|${normalizeText(athlete.firstname)}|${athlete.birthdate || ''}`
@@ -861,7 +863,7 @@ export function ImportEntries() {
                       })
                       return
                     }
-                    const selected = meetEvents.find(event => event.ms_id === Number(value))
+                    const selected = importableMeetEvents.find(event => event.ms_id === Number(value))
                     updateEventMapping(mapping.key, {
                       createNew: false,
                       dbEventId: selected?.ms_id || null,
@@ -877,7 +879,7 @@ export function ImportEntries() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="new">Create new event</SelectItem>
-                    {meetEvents.map(event => (
+                    {importableMeetEvents.map(event => (
                       <SelectItem key={event.ms_id} value={event.ms_id.toString()}>
                         Event #{event.event_numb} • {event.race?.distance} {event.race?.stroke_short_en} • {event.gender}
                       </SelectItem>
